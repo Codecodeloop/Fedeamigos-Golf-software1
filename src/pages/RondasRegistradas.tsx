@@ -69,8 +69,8 @@ const RondasRegistradas = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <Card>
+    <div className="min-h-screen bg-[#1B4D3E] p-6">
+      <Card className="bg-[#2E7D32] border-green-700 text-green-100">
         <CardHeader>
           <CardTitle>Rondas Registradas</CardTitle>
           <CardDescription>
@@ -79,12 +79,12 @@ const RondasRegistradas = () => {
         </CardHeader>
         <CardContent>
           {rounds.length === 0 ? (
-            <p className="text-muted-foreground">No hay rondas registradas.</p>
+            <p className="text-green-200">No hay rondas registradas.</p>
           ) : (
             <div className="space-y-10">
               {rounds.map((round) => (
                 <div key={round.id}>
-                  <h3 className="font-semibold mb-6 text-xl border-b border-border pb-2">
+                  <h3 className="font-semibold mb-6 text-xl border-b border-green-600 pb-2 text-green-100">
                     Fecha: {round.date}
                   </h3>
                   <div className="space-y-8">
@@ -101,118 +101,118 @@ const RondasRegistradas = () => {
                       const handicap75 = player.handicap !== null ? Math.round(player.handicap * 0.75) : null;
 
                       return (
-                        <Card key={player.name} className="p-4">
+                        <Card key={player.name} className="p-4 bg-green-800 border-green-700 text-green-100">
                           <div className="flex justify-between items-center mb-4">
                             <h4 className="font-semibold text-lg">{player.name}</h4>
-                            <span className="text-sm text-muted-foreground flex items-center gap-2">
+                            <span className="text-sm flex items-center gap-2 text-green-200">
                               Handicap: {player.handicap ?? "-"}
                               {handicap75 !== null && (
-                                <span className="text-red-600 text-xs font-mono">
+                                <span className="text-red-400 text-xs font-mono">
                                   ({handicap75})
                                 </span>
                               )}
                             </span>
                           </div>
 
-                          <table className="w-full table-fixed border border-border text-center text-sm">
+                          <table className="w-full table-fixed border border-green-700 text-center text-sm text-green-100">
                             <thead>
-                              <tr className="bg-muted border-b border-border">
-                                <th className="border border-border px-3 py-1 text-left w-16">HOLES</th>
+                              <tr className="bg-green-700 border-b border-green-600">
+                                <th className="border border-green-600 px-3 py-1 text-left w-16">HOLES</th>
                                 {holeNumbers.slice(0, 9).map((num) => (
-                                  <th key={num} className="border border-border px-2 py-1">
+                                  <th key={num} className="border border-green-600 px-2 py-1">
                                     {num}
                                   </th>
                                 ))}
-                                <th className="border border-border px-2 py-1 font-bold">OUT</th>
+                                <th className="border border-green-600 px-2 py-1 font-bold">OUT</th>
                                 {holeNumbers.slice(9, 18).map((num) => (
-                                  <th key={num} className="border border-border px-2 py-1">
+                                  <th key={num} className="border border-green-600 px-2 py-1">
                                     {num}
                                   </th>
                                 ))}
-                                <th className="border border-border px-2 py-1 font-bold">IN</th>
-                                <th className="border border-border px-2 py-1">TOTAL</th>
+                                <th className="border border-green-600 px-2 py-1 font-bold">IN</th>
+                                <th className="border border-green-600 px-2 py-1">TOTAL</th>
                               </tr>
-                              <tr className="bg-muted border-b border-border">
-                                <th className="border border-border px-3 py-1 text-left w-16 font-semibold">PAR</th>
+                              <tr className="bg-green-700 border-b border-green-600">
+                                <th className="border border-green-600 px-3 py-1 text-left w-16 font-semibold">PAR</th>
                                 {holePars.slice(0, 9).map((par, i) => (
-                                  <th key={i} className="border border-border px-2 py-1 font-mono">
+                                  <th key={i} className="border border-green-600 px-2 py-1 font-mono">
                                     {par}
                                   </th>
                                 ))}
-                                <th className="border border-border px-2 py-1 font-bold">
+                                <th className="border border-green-600 px-2 py-1 font-bold">
                                   {holePars.slice(0, 9).reduce((a, b) => a + b, 0)}
                                 </th>
                                 {holePars.slice(9, 18).map((par, i) => (
-                                  <th key={i + 9} className="border border-border px-2 py-1 font-mono">
+                                  <th key={i + 9} className="border border-green-600 px-2 py-1 font-mono">
                                     {par}
                                   </th>
                                 ))}
-                                <th className="border border-border px-2 py-1 font-bold">
+                                <th className="border border-green-600 px-2 py-1 font-bold">
                                   {holePars.slice(9, 18).reduce((a, b) => a + b, 0)}
                                 </th>
-                                <th className="border border-border px-2 py-1 font-mono">
+                                <th className="border border-green-600 px-2 py-1 font-mono">
                                   {holePars.reduce((a, b) => a + b, 0)}
                                 </th>
                               </tr>
-                              <tr className="bg-muted border-b border-border">
-                                <th className="border border-border px-1 py-1 text-left w-16 font-semibold text-purple-700 text-xs leading-tight">VENTAJAS</th>
+                              <tr className="bg-green-700 border-b border-green-600">
+                                <th className="border border-green-600 px-1 py-1 text-left w-16 font-semibold text-purple-300 text-xs leading-tight">VENTAJAS</th>
                                 {holeHandicaps.slice(0, 9).map((handicap, i) => (
-                                  <th key={i} className="border border-border px-2 py-1 font-mono text-purple-700">
+                                  <th key={i} className="border border-green-600 px-2 py-1 font-mono text-purple-300">
                                     {handicap}
                                   </th>
                                 ))}
-                                <th className="border border-border px-2 py-1"></th>
+                                <th className="border border-green-600 px-2 py-1"></th>
                                 {holeHandicaps.slice(9, 18).map((handicap, i) => (
-                                  <th key={i + 9} className="border border-border px-2 py-1 font-mono text-purple-700">
+                                  <th key={i + 9} className="border border-green-600 px-2 py-1 font-mono text-purple-300">
                                     {handicap}
                                   </th>
                                 ))}
-                                <th className="border border-border px-2 py-1"></th>
-                                <th className="border border-border px-2 py-1"></th>
+                                <th className="border border-green-600 px-2 py-1"></th>
+                                <th className="border border-green-600 px-2 py-1"></th>
                               </tr>
                             </thead>
                             <tbody>
                               <tr>
-                                <td className="border border-border px-3 py-1 font-semibold text-left w-16">SCORE</td>
+                                <td className="border border-green-600 px-3 py-1 font-semibold text-left w-16">SCORE</td>
                                 {player.scores.slice(0, 9).map((score, i) => (
-                                  <td key={i} className="border border-border px-2 py-1 font-mono">
+                                  <td key={i} className="border border-green-600 px-2 py-1 font-mono">
                                     {score !== null ? score : "-"}
                                   </td>
                                 ))}
-                                <td className="border border-border px-2 py-1 font-mono font-bold">
+                                <td className="border border-green-600 px-2 py-1 font-mono font-bold">
                                   {outScore > 0 ? outScore : "-"}
                                 </td>
                                 {player.scores.slice(9, 18).map((score, i) => (
-                                  <td key={i + 9} className="border border-border px-2 py-1 font-mono">
+                                  <td key={i + 9} className="border border-green-600 px-2 py-1 font-mono">
                                     {score !== null ? score : "-"}
                                   </td>
                                 ))}
-                                <td className="border border-border px-2 py-1 font-mono font-bold">
+                                <td className="border border-green-600 px-2 py-1 font-mono font-bold">
                                   {inScore > 0 ? inScore : "-"}
                                 </td>
-                                <td className="border border-border px-2 py-1 font-mono">
+                                <td className="border border-green-600 px-2 py-1 font-mono">
                                   {totalScore > 0 ? totalScore : "-"}
                                 </td>
                               </tr>
                               <tr>
-                                <td className="border border-border px-3 py-1 font-semibold text-left w-16">NETO</td>
+                                <td className="border border-green-600 px-3 py-1 font-semibold text-left w-16">NETO</td>
                                 {netScores.slice(0, 9).map((score, i) => (
-                                  <td key={i} className="border border-border px-2 py-1 font-mono text-green-600">
+                                  <td key={i} className="border border-green-600 px-2 py-1 font-mono text-green-300">
                                     {score !== null ? score : "-"}
                                   </td>
                                 ))}
-                                <td className="border border-border px-2 py-1 font-mono font-bold text-green-600">
+                                <td className="border border-green-600 px-2 py-1 font-mono font-bold text-green-300">
                                   {outNet > 0 ? outNet : "-"}
                                 </td>
                                 {netScores.slice(9, 18).map((score, i) => (
-                                  <td key={i + 9} className="border border-border px-2 py-1 font-mono text-green-600">
+                                  <td key={i + 9} className="border border-green-600 px-2 py-1 font-mono text-green-300">
                                     {score !== null ? score : "-"}
                                   </td>
                                 ))}
-                                <td className="border border-border px-2 py-1 font-mono font-bold text-green-600">
+                                <td className="border border-green-600 px-2 py-1 font-mono font-bold text-green-300">
                                   {inNet > 0 ? inNet : "-"}
                                 </td>
-                                <td className="border border-border px-2 py-1 font-mono text-green-600">
+                                <td className="border border-green-600 px-2 py-1 font-mono text-green-300">
                                   {totalNet > 0 ? totalNet : "-"}
                                 </td>
                               </tr>
