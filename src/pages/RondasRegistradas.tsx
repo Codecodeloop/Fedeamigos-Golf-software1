@@ -92,12 +92,19 @@ const RondasRegistradas = () => {
                       const inNet = sumScores(netScores, 9, 18);
                       const totalNet = outNet + inNet;
 
+                      const handicap75 = player.handicap !== null ? Math.round(player.handicap * 0.75) : null;
+
                       return (
                         <Card key={player.name} className="p-4">
                           <div className="flex justify-between items-center mb-4">
                             <h4 className="font-semibold text-lg">{player.name}</h4>
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-sm text-muted-foreground flex items-center gap-2">
                               Handicap: {player.handicap ?? "-"}
+                              {handicap75 !== null && (
+                                <span className="text-red-600 text-xs font-mono">
+                                  ({handicap75})
+                                </span>
+                              )}
                             </span>
                           </div>
 
