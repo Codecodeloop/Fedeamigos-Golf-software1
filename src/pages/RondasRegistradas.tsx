@@ -63,27 +63,43 @@ const RondasRegistradas = () => {
                             <thead>
                               <tr className="bg-muted border-b border-border">
                                 <th className="border border-border px-2 py-1">HOLES</th>
-                                {holeNumbers.map((num) => (
+                                {holeNumbers.slice(0, 9).map((num) => (
                                   <th key={num} className="border border-border px-2 py-1">
                                     {num}
                                   </th>
                                 ))}
-                                <th className="border border-border px-2 py-1">OUT</th>
-                                <th className="border border-border px-2 py-1">IN</th>
+                                <th className="border border-border px-2 py-1 font-bold">OUT</th>
+                                {holeNumbers.slice(9, 18).map((num) => (
+                                  <th key={num} className="border border-border px-2 py-1">
+                                    {num}
+                                  </th>
+                                ))}
+                                <th className="border border-border px-2 py-1 font-bold">IN</th>
                                 <th className="border border-border px-2 py-1">TOTAL</th>
                               </tr>
                             </thead>
                             <tbody>
                               <tr>
                                 <td className="border border-border px-2 py-1 font-semibold">SCORE</td>
-                                {player.scores.map((score, i) => (
+                                {player.scores.slice(0, 9).map((score, i) => (
                                   <td key={i} className="border border-border px-2 py-1 font-mono">
                                     {score !== null ? score : "-"}
                                   </td>
                                 ))}
-                                <td className="border border-border px-2 py-1 font-mono">{outScore > 0 ? outScore : "-"}</td>
-                                <td className="border border-border px-2 py-1 font-mono">{inScore > 0 ? inScore : "-"}</td>
-                                <td className="border border-border px-2 py-1 font-mono">{totalScore > 0 ? totalScore : "-"}</td>
+                                <td className="border border-border px-2 py-1 font-mono font-bold">
+                                  {outScore > 0 ? outScore : "-"}
+                                </td>
+                                {player.scores.slice(9, 18).map((score, i) => (
+                                  <td key={i + 9} className="border border-border px-2 py-1 font-mono">
+                                    {score !== null ? score : "-"}
+                                  </td>
+                                ))}
+                                <td className="border border-border px-2 py-1 font-mono font-bold">
+                                  {inScore > 0 ? inScore : "-"}
+                                </td>
+                                <td className="border border-border px-2 py-1 font-mono">
+                                  {totalScore > 0 ? totalScore : "-"}
+                                </td>
                               </tr>
                             </tbody>
                           </table>
