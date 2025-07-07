@@ -21,6 +21,12 @@ const holeHandicaps = [
 // Hole numbers 1 to 18
 const holeNumbers = Array.from({ length: 18 }, (_, i) => i + 1);
 
+// Par for each hole at Club Campestre de Bucaramanga
+const holePars = [
+  4, 3, 4, 4, 5, 3, 4, 5, 4,
+  4, 3, 4, 4, 5, 3, 4, 5, 4,
+];
+
 const RondasRegistradas = () => {
   const { rounds } = useRondas();
   const navigate = useNavigate();
@@ -125,6 +131,28 @@ const RondasRegistradas = () => {
                                 ))}
                                 <th className="border border-border px-2 py-1 font-bold">IN</th>
                                 <th className="border border-border px-2 py-1">TOTAL</th>
+                              </tr>
+                              <tr className="bg-muted border-b border-border">
+                                <th className="border border-border px-3 py-1 text-left w-16 font-semibold">PAR</th>
+                                {holePars.slice(0, 9).map((par, i) => (
+                                  <th key={i} className="border border-border px-2 py-1 font-mono">
+                                    {par}
+                                  </th>
+                                ))}
+                                <th className="border border-border px-2 py-1 font-bold">
+                                  {holePars.slice(0, 9).reduce((a, b) => a + b, 0)}
+                                </th>
+                                {holePars.slice(9, 18).map((par, i) => (
+                                  <th key={i + 9} className="border border-border px-2 py-1 font-mono">
+                                    {par}
+                                  </th>
+                                ))}
+                                <th className="border border-border px-2 py-1 font-bold">
+                                  {holePars.slice(9, 18).reduce((a, b) => a + b, 0)}
+                                </th>
+                                <th className="border border-border px-2 py-1 font-mono">
+                                  {holePars.reduce((a, b) => a + b, 0)}
+                                </th>
                               </tr>
                             </thead>
                             <tbody>
