@@ -155,7 +155,7 @@ const RondasRegistradas = () => {
                                 </th>
                               </tr>
                               <tr className="bg-muted border-b border-border">
-                                <th className="border border-border px-3 py-1 text-left w-16 font-semibold text-purple-700">VENTAJAS</th>
+                                <th className="border border-border px-1 py-1 text-left w-16 font-semibold text-purple-700 text-xs leading-tight">VENTAJAS</th>
                                 {holeHandicaps.slice(0, 9).map((handicap, i) => (
                                   <th key={i} className="border border-border px-2 py-1 font-mono text-purple-700">
                                     {handicap}
