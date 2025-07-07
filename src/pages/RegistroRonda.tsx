@@ -209,75 +209,85 @@ const RegistroRonda = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {players.map((player, pIndex) => (
-                      <tr key={player.name} className="odd:bg-background even:bg-muted/20">
-                        <td className="border border-border p-2">
-                          {editingIndex === pIndex ? (
-                            <Input
-                              value={editName}
-                              onChange={(e) => setEditName(e.target.value)}
-                              className="w-full"
-                            />
-                          ) : (
-                            player.name
-                          )}
-                        </td>
-                        <td className="border border-border p-2">
-                          {editingIndex === pIndex ? (
-                            <Input
-                              type="number"
-                              min={0}
-                              step={0.1}
-                              value={editHandicap}
-                              onChange={(e) => setEditHandicap(e.target.value)}
-                              className="w-full"
-                            />
-                          ) : (
-                            player.handicap ?? "-"
-                          )}
-                        </td>
-                        {player.scores.map((score, hIndex) => (
-                          <td key={hIndex} className="border border-border p-1">
-                            <Input
-                              type="number"
-                              min={0}
-                              value={score !== null ? score : ""}
-                              onChange={(e) =>
-                                updateScore(pIndex, hIndex, e.target.value)
-                              }
-                              className="w-12 text-center p-1"
-                              placeholder="-"
-                            />
+                    {players.map((player, pIndex) => {
+                      const handicap75 = player.handicap !== null ? Math.round(player.handicap * 0.75) : null;
+                      return (
+                        <tr key={player.name} className="odd:bg-background even:bg-muted/20">
+                          <td className="border border-border p-2">
+                            {editingIndex === pIndex ? (
+                              <Input
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                className="w-full"
+                              />
+                            ) : (
+                              player.name
+                            )}
                           </td>
-                        ))}
-                        <td className="border border-border p-2 text-center space-x-1">
-                          {editingIndex === pIndex ? (
-                            <>
-                              <Button size="sm" variant="outline" onClick={saveEditing}>
-                                Guardar
-                              </Button>
-                              <Button size="sm" variant="ghost" onClick={cancelEditing}>
-                                Cancelar
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <Button size="sm" variant="outline" onClick={() => startEditing(pIndex)}>
-                                Editar
-                              </Button>
-                              <button
-                                type="button"
-                                onClick={() => removePlayer(player.name)}
-                                className="text-red-600 hover:text-red-800 font-bold ml-2"
-                                aria-label={`Eliminar jugador ${player.name}`}
-                              >
-                                &times;
-                              </button>
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                          <td className="border border-border p-2">
+                            {editingIndex === pIndex ? (
+                              <Input
+                                type="number"
+                                min={0}
+                                step={0.1}
+                                value={editHandicap}
+                                onChange={(e) => setEditHandicap(e.target.value)}
+                                className="w-full"
+                              />
+                            ) : (
+                              <div className="flex flex-col items-start">
+                                <span>{player.handicap ?? "-"}</span>
+                                {handicap75 !== null && (
+                                  <span className="text-red-600 text-xs font-mono">
+                                    {handicap75}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                          {player.scores.map((score, hIndex) => (
+                            <td key={hIndex} className="border border-border p-1">
+                              <Input
+                                type="number"
+                                min={0}
+                                value={score !== null ? score : ""}
+                                onChange={(e) =>
+                                  updateScore(pIndex, hIndex, e.target.value)
+                                }
+                                className="w-12 text-center p-1"
+                                placeholder="-"
+                              />
+                            </td>
+                          ))}
+                          <td className="border border-border p-2 text-center space-x-1">
+                            {editingIndex === pIndex ? (
+                              <>
+                                <Button size="sm" variant="outline" onClick={saveEditing}>
+                                  Guardar
+                                </Button>
+                                <Button size="sm" variant="ghost" onClick={cancelEditing}>
+                                  Cancelar
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                <Button size="sm" variant="outline" onClick={() => startEditing(pIndex)}>
+                                  Editar
+                                </Button>
+                                <button
+                                  type="button"
+                                  onClick={() => removePlayer(player.name)}
+                                  className="text-red-600 hover:text-red-800 font-bold ml-2"
+                                  aria-label={`Eliminar jugador ${player.name}`}
+                                >
+                                  &times;
+                                </button>
+                              </>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
