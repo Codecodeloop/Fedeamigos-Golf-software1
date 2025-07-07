@@ -159,9 +159,12 @@ const RegistroRonda = () => {
                   required
                 />
               </div>
-              <div className="ml-4 mt-6">
+              <div className="ml-4 mt-6 space-x-2">
                 <Button variant="secondary" onClick={() => navigate("/rondas-registradas")}>
                   Ver Rondas Registradas
+                </Button>
+                <Button variant="secondary" onClick={() => navigate("/")}>
+                  Volver a Inicio
                 </Button>
               </div>
             </div>

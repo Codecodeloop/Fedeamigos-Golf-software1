@@ -226,9 +226,12 @@ const RondasRegistradas = () => {
               ))}
             </div>
           )}
-          <div className="pt-6">
+          <div className="pt-6 flex gap-2">
             <Button onClick={() => navigate("/registro-ronda")}>
               Volver a Registro de Ronda
+            </Button>
+            <Button onClick={() => navigate("/")} variant="secondary">
+              Volver a Inicio
             </Button>
           </div>
         </CardContent>
