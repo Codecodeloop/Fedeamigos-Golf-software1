@@ -21,10 +21,10 @@ const holeHandicaps = [
 // Hole numbers 1 to 18
 const holeNumbers = Array.from({ length: 18 }, (_, i) => i + 1);
 
-// Par for each hole at Club Campestre de Bucaramanga
+// Correct par for each hole at Club Campestre de Bucaramanga
 const holePars = [
-  4, 3, 4, 4, 5, 3, 4, 5, 4,
-  4, 3, 4, 4, 5, 3, 4, 5, 4,
+  4, 3, 4, 5, 4, 4, 3, 5, 4,
+  3, 4, 4, 5, 4, 4, 3, 5, 4,
 ];
 
 const RondasRegistradas = () => {
