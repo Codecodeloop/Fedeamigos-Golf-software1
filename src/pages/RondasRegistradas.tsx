@@ -154,6 +154,28 @@ const RondasRegistradas = () => {
                                   {holePars.reduce((a, b) => a + b, 0)}
                                 </th>
                               </tr>
+                              <tr className="bg-muted border-b border-border">
+                                <th className="border border-border px-3 py-1 text-left w-16 font-semibold text-purple-700">VENTAJAS</th>
+                                {holeHandicaps.slice(0, 9).map((handicap, i) => (
+                                  <th key={i} className="border border-border px-2 py-1 font-mono text-purple-700">
+                                    {handicap}
+                                  </th>
+                                ))}
+                                <th className="border border-border px-2 py-1 font-bold text-purple-700">
+                                  {holeHandicaps.slice(0, 9).reduce((a, b) => a + b, 0)}
+                                </th>
+                                {holeHandicaps.slice(9, 18).map((handicap, i) => (
+                                  <th key={i + 9} className="border border-border px-2 py-1 font-mono text-purple-700">
+                                    {handicap}
+                                  </th>
+                                ))}
+                                <th className="border border-border px-2 py-1 font-bold text-purple-700">
+                                  {holeHandicaps.slice(9, 18).reduce((a, b) => a + b, 0)}
+                                </th>
+                                <th className="border border-border px-2 py-1 font-mono text-purple-700">
+                                  {holeHandicaps.reduce((a, b) => a + b, 0)}
+                                </th>
+                              </tr>
                             </thead>
                             <tbody>
                               <tr>
