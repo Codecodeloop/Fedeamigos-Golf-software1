@@ -18,6 +18,12 @@ type Player = {
   scores: (number | null)[];
 };
 
+// Updated hole handicaps as per user correction
+const holeHandicaps = [
+  5, 17, 15, 1, 13, 7, 9, 3, 1,
+  18, 2, 14, 6, 12, 10, 8, 4, 16,
+];
+
 const RegistroRonda = () => {
   const [date, setDate] = useState("");
   const [playerName, setPlayerName] = useState("");
@@ -142,9 +148,14 @@ const RegistroRonda = () => {
                     <tr className="bg-muted">
                       <th className="border border-border p-2 text-left">Jugador</th>
                       <th className="border border-border p-2 text-left">Handicap</th>
-                      {[...Array(18)].map((_, i) => (
+                      {holeHandicaps.map((handicap, i) => (
                         <th key={i} className="border border-border p-2 text-center">
-                          H{i + 1}
+                          <div className="flex flex-col items-center">
+                            <span className="font-semibold">{i + 1}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {handicap}
+                            </span>
+                          </div>
                         </th>
                       ))}
                       <th className="border border-border p-2 text-center">Eliminar</th>
