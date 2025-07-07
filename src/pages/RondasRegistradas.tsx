@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 
 // Handicap difficulty per hole (1 = hardest, 18 = easiest)
 const holeHandicaps = [
-  5, 17, 15, 1, 13, 7, 9, 3, 1,
+  5, 17, 15, 1, 13, 7, 9, 3, 11,
   18, 2, 14, 6, 12, 10, 8, 4, 16,
 ];
 
@@ -161,20 +161,14 @@ const RondasRegistradas = () => {
                                     {handicap}
                                   </th>
                                 ))}
-                                <th className="border border-border px-2 py-1 font-bold text-purple-700">
-                                  {holeHandicaps.slice(0, 9).reduce((a, b) => a + b, 0)}
-                                </th>
+                                <th className="border border-border px-2 py-1"></th>
                                 {holeHandicaps.slice(9, 18).map((handicap, i) => (
                                   <th key={i + 9} className="border border-border px-2 py-1 font-mono text-purple-700">
                                     {handicap}
                                   </th>
                                 ))}
-                                <th className="border border-border px-2 py-1 font-bold text-purple-700">
-                                  {holeHandicaps.slice(9, 18).reduce((a, b) => a + b, 0)}
-                                </th>
-                                <th className="border border-border px-2 py-1 font-mono text-purple-700">
-                                  {holeHandicaps.reduce((a, b) => a + b, 0)}
-                                </th>
+                                <th className="border border-border px-2 py-1"></th>
+                                <th className="border border-border px-2 py-1"></th>
                               </tr>
                             </thead>
                             <tbody>
