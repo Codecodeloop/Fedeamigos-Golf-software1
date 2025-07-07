@@ -18,7 +18,6 @@ type Player = {
   scores: (number | null)[];
 };
 
-// Updated hole handicaps as per user correction
 const holeHandicaps = [
   5, 17, 15, 1, 13, 7, 9, 3, 1,
   18, 2, 14, 6, 12, 10, 8, 4, 16,
@@ -29,6 +28,9 @@ const RegistroRonda = () => {
   const [playerName, setPlayerName] = useState("");
   const [playerHandicap, setPlayerHandicap] = useState("");
   const [players, setPlayers] = useState<Player[]>([]);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editHandicap, setEditHandicap] = useState("");
 
   const addPlayer = () => {
     const trimmedName = playerName.trim();
@@ -55,6 +57,9 @@ const RegistroRonda = () => {
 
   const removePlayer = (name: string) => {
     setPlayers((prev) => prev.filter((p) => p.name !== name));
+    if (editingIndex !== null && players[editingIndex]?.name === name) {
+      setEditingIndex(null);
+    }
   };
 
   const updateScore = (playerIndex: number, holeIndex: number, value: string) => {
@@ -68,6 +73,47 @@ const RegistroRonda = () => {
       }
       return newPlayers;
     });
+  };
+
+  const startEditing = (index: number) => {
+    setEditingIndex(index);
+    setEditName(players[index].name);
+    setEditHandicap(players[index].handicap !== null ? players[index].handicap.toString() : "");
+  };
+
+  const saveEditing = () => {
+    if (editingIndex === null) return;
+    const trimmedName = editName.trim();
+    if (!trimmedName) {
+      alert("El nombre no puede estar vacío.");
+      return;
+    }
+    // Check for duplicate names except the one being edited
+    if (
+      players.some(
+        (p, i) => i !== editingIndex && p.name.toLowerCase() === trimmedName.toLowerCase(),
+      )
+    ) {
+      alert("Ya existe un jugador con ese nombre.");
+      return;
+    }
+    const handicapNum = parseFloat(editHandicap);
+    const handicap = !isNaN(handicapNum) && handicapNum >= 0 ? handicapNum : null;
+
+    setPlayers((prev) => {
+      const newPlayers = [...prev];
+      newPlayers[editingIndex] = {
+        ...newPlayers[editingIndex],
+        name: trimmedName,
+        handicap,
+      };
+      return newPlayers;
+    });
+    setEditingIndex(null);
+  };
+
+  const cancelEditing = () => {
+    setEditingIndex(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -85,6 +131,7 @@ const RegistroRonda = () => {
     alert("Ronda registrada correctamente.");
     setDate("");
     setPlayers([]);
+    setEditingIndex(null);
   };
 
   return (
@@ -158,14 +205,37 @@ const RegistroRonda = () => {
                           </div>
                         </th>
                       ))}
-                      <th className="border border-border p-2 text-center">Eliminar</th>
+                      <th className="border border-border p-2 text-center">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {players.map((player, pIndex) => (
                       <tr key={player.name} className="odd:bg-background even:bg-muted/20">
-                        <td className="border border-border p-2">{player.name}</td>
-                        <td className="border border-border p-2">{player.handicap ?? "-"}</td>
+                        <td className="border border-border p-2">
+                          {editingIndex === pIndex ? (
+                            <Input
+                              value={editName}
+                              onChange={(e) => setEditName(e.target.value)}
+                              className="w-full"
+                            />
+                          ) : (
+                            player.name
+                          )}
+                        </td>
+                        <td className="border border-border p-2">
+                          {editingIndex === pIndex ? (
+                            <Input
+                              type="number"
+                              min={0}
+                              step={0.1}
+                              value={editHandicap}
+                              onChange={(e) => setEditHandicap(e.target.value)}
+                              className="w-full"
+                            />
+                          ) : (
+                            player.handicap ?? "-"
+                          )}
+                        </td>
                         {player.scores.map((score, hIndex) => (
                           <td key={hIndex} className="border border-border p-1">
                             <Input
@@ -180,15 +250,31 @@ const RegistroRonda = () => {
                             />
                           </td>
                         ))}
-                        <td className="border border-border p-2 text-center">
-                          <button
-                            type="button"
-                            onClick={() => removePlayer(player.name)}
-                            className="text-red-600 hover:text-red-800 font-bold"
-                            aria-label={`Eliminar jugador ${player.name}`}
-                          >
-                            &times;
-                          </button>
+                        <td className="border border-border p-2 text-center space-x-1">
+                          {editingIndex === pIndex ? (
+                            <>
+                              <Button size="sm" variant="outline" onClick={saveEditing}>
+                                Guardar
+                              </Button>
+                              <Button size="sm" variant="ghost" onClick={cancelEditing}>
+                                Cancelar
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button size="sm" variant="outline" onClick={() => startEditing(pIndex)}>
+                                Editar
+                              </Button>
+                              <button
+                                type="button"
+                                onClick={() => removePlayer(player.name)}
+                                className="text-red-600 hover:text-red-800 font-bold ml-2"
+                                aria-label={`Eliminar jugador ${player.name}`}
+                              >
+                                &times;
+                              </button>
+                            </>
+                          )}
                         </td>
                       </tr>
                     ))}
