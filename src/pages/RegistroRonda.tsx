@@ -7,16 +7,12 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-
-type Player = {
-  name: string;
-  handicap: number | null;
-  scores: (number | null)[];
-};
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { useNavigate } from "react-router-dom";
+import { useRondas, Player, Round } from "../context/RondasContext";
 
 const holeHandicaps = [
   5, 17, 15, 1, 13, 7, 9, 3, 1,
@@ -31,6 +27,9 @@ const RegistroRonda = () => {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
   const [editHandicap, setEditHandicap] = useState("");
+
+  const { addRound } = useRondas();
+  const navigate = useNavigate();
 
   const addPlayer = () => {
     const trimmedName = playerName.trim();
@@ -126,8 +125,12 @@ const RegistroRonda = () => {
       alert("Por favor agrega al menos un jugador.");
       return;
     }
-    // For now just log the data
-    console.log("Ronda registrada:", { date, players });
+    const newRound: Round = {
+      id: Date.now(),
+      date,
+      players,
+    };
+    addRound(newRound);
     alert("Ronda registrada correctamente.");
     setDate("");
     setPlayers([]);
@@ -145,15 +148,22 @@ const RegistroRonda = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <Label htmlFor="date">Fecha de la ronda</Label>
-              <Input
-                id="date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-              />
+            <div className="flex justify-between items-center">
+              <div className="flex-1">
+                <Label htmlFor="date">Fecha de la ronda</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="ml-4 mt-6">
+                <Button variant="secondary" onClick={() => navigate("/rondas-registradas")}>
+                  Ver Rondas Registradas
+                </Button>
+              </div>
             </div>
 
             <div className="border rounded p-4">
