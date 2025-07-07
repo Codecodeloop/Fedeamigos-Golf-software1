@@ -12,6 +12,13 @@ import { Button } from "../components/ui/button";
 import { useRondas } from "../context/RondasContext";
 import { useNavigate } from "react-router-dom";
 
+// Handicap difficulty per hole (1 = hardest, 18 = easiest)
+const holeHandicaps = [
+  5, 17, 15, 1, 13, 7, 9, 3, 1,
+  18, 2, 14, 6, 12, 10, 8, 4, 16,
+];
+
+// Hole numbers 1 to 18
 const holeNumbers = Array.from({ length: 18 }, (_, i) => i + 1);
 
 const RondasRegistradas = () => {
@@ -23,6 +30,36 @@ const RondasRegistradas = () => {
     return scores
       .slice(start, end)
       .reduce((acc, val) => acc + (val ?? 0), 0);
+  };
+
+  // Calculate net score per hole based on player handicap and hole handicaps
+  const calculateNetScores = (scores: (number | null)[], playerHandicap: number | null) => {
+    if (playerHandicap === null || playerHandicap <= 0) {
+      // No handicap, net score = gross score
+      return scores.map((score) => (score !== null ? score : null));
+    }
+
+    // Number of full strokes to subtract per hole
+    const fullStrokes = Math.floor(playerHandicap);
+    // Number of holes to subtract an extra stroke (for fractional handicap)
+    const extraStrokes = Math.round((playerHandicap - fullStrokes) * 18);
+
+    return scores.map((score, index) => {
+      if (score === null) return null;
+      const holeHandicap = holeHandicaps[index];
+      let strokesToSubtract = 0;
+      if (holeHandicap <= fullStrokes) {
+        strokesToSubtract = 1;
+      }
+      // For extra strokes, subtract an additional stroke on the easiest holes
+      // The easiest holes are those with highest holeHandicap number
+      // So if extraStrokes > 0, subtract 1 more stroke on holes with holeHandicap > (18 - extraStrokes)
+      if (extraStrokes > 0 && holeHandicap > 18 - extraStrokes) {
+        strokesToSubtract += 1;
+      }
+      const netScore = score - strokesToSubtract;
+      return netScore > 0 ? netScore : 0;
+    });
   };
 
   return (
@@ -49,6 +86,11 @@ const RondasRegistradas = () => {
                       const outScore = sumScores(player.scores, 0, 9);
                       const inScore = sumScores(player.scores, 9, 18);
                       const totalScore = outScore + inScore;
+
+                      const netScores = calculateNetScores(player.scores, player.handicap);
+                      const outNet = sumScores(netScores, 0, 9);
+                      const inNet = sumScores(netScores, 9, 18);
+                      const totalNet = outNet + inNet;
 
                       return (
                         <Card key={player.name} className="p-4">
@@ -99,6 +141,28 @@ const RondasRegistradas = () => {
                                 </td>
                                 <td className="border border-border px-2 py-1 font-mono">
                                   {totalScore > 0 ? totalScore : "-"}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td className="border border-border px-3 py-1 font-semibold text-left w-16">NETO</td>
+                                {netScores.slice(0, 9).map((score, i) => (
+                                  <td key={i} className="border border-border px-2 py-1 font-mono text-green-600">
+                                    {score !== null ? score : "-"}
+                                  </td>
+                                ))}
+                                <td className="border border-border px-2 py-1 font-mono font-bold text-green-600">
+                                  {outNet > 0 ? outNet : "-"}
+                                </td>
+                                {netScores.slice(9, 18).map((score, i) => (
+                                  <td key={i + 9} className="border border-border px-2 py-1 font-mono text-green-600">
+                                    {score !== null ? score : "-"}
+                                  </td>
+                                ))}
+                                <td className="border border-border px-2 py-1 font-mono font-bold text-green-600">
+                                  {inNet > 0 ? inNet : "-"}
+                                </td>
+                                <td className="border border-border px-2 py-1 font-mono text-green-600">
+                                  {totalNet > 0 ? totalNet : "-"}
                                 </td>
                               </tr>
                             </tbody>
