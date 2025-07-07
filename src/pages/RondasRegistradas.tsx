@@ -12,6 +12,11 @@ import { Button } from "../components/ui/button";
 import { useRondas } from "../context/RondasContext";
 import { useNavigate } from "react-router-dom";
 
+const holeHandicaps = [
+  5, 17, 15, 1, 13, 7, 9, 3, 1,
+  18, 2, 14, 6, 12, 10, 8, 4, 16,
+];
+
 const RondasRegistradas = () => {
   const { rounds } = useRondas();
   const navigate = useNavigate();
@@ -32,29 +37,41 @@ const RondasRegistradas = () => {
             <div className="space-y-8">
               {rounds.map((round) => (
                 <div key={round.id} className="border rounded p-4">
-                  <h3 className="font-semibold mb-2">Fecha: {round.date}</h3>
-                  <table className="w-full border-collapse border border-border text-sm">
-                    <thead>
-                      <tr className="bg-muted">
-                        <th className="border border-border p-2 text-left">Jugador</th>
-                        <th className="border border-border p-2 text-left">Handicap</th>
-                        <th className="border border-border p-2 text-left">Scores (18 hoyos)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {round.players.map((player) => (
-                        <tr key={player.name} className="odd:bg-background even:bg-muted/20">
-                          <td className="border border-border p-2">{player.name}</td>
-                          <td className="border border-border p-2">{player.handicap ?? "-"}</td>
-                          <td className="border border-border p-2">
-                            {player.scores.map((score, i) =>
-                              score !== null ? score : "-"
-                            ).join(", ")}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <h3 className="font-semibold mb-4 text-lg">Fecha: {round.date}</h3>
+                  {round.players.map((player) => (
+                    <div
+                      key={player.name}
+                      className="mb-6 border border-border rounded p-4 shadow-sm"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="font-semibold text-base">{player.name}</h4>
+                        <span className="text-sm text-muted-foreground">
+                          Handicap: {player.handicap ?? "-"}
+                        </span>
+                      </div>
+
+                      {/* Hole numbers and handicaps */}
+                      <div className="grid grid-cols-18 text-center border-b border-border pb-1 mb-1 select-none">
+                        {holeHandicaps.map((handicap, i) => (
+                          <div key={i} className="text-xs font-semibold">
+                            <div>{i + 1}</div>
+                            <div className="text-red-600 text-[10px] font-mono">
+                              {handicap}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Scores */}
+                      <div className="grid grid-cols-18 text-center">
+                        {player.scores.map((score, i) => (
+                          <div key={i} className="text-sm font-mono">
+                            {score !== null ? score : "-"}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
