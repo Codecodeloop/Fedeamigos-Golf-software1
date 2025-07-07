@@ -8,8 +8,12 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <Card>
@@ -129,6 +133,12 @@ const Index = () => {
               • Birdies netos (por efecto del hándicap) no cuentan.
             </p>
           </section>
+
+          <div className="pt-4">
+            <Button onClick={() => navigate("/registro-ronda")}>
+              Ir a Registro de Ronda de Golf
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
