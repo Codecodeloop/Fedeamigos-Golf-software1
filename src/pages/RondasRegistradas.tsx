@@ -324,30 +324,36 @@ const RondasRegistradas = () => {
                     <thead>
                       <tr className="bg-muted border-b border-border">
                         <th className="border border-border px-2 py-1">Hoyo</th>
-                        {holeNumbers.slice(0, 9).map((num) => (
+                        {holeNumbers.map((num) => (
                           <th key={num} className="border border-border px-2 py-1">{num}</th>
                         ))}
-                        <th className="border border-border px-2 py-1 font-bold">OUT</th>
+                        <th className="border border-border px-2 py-1 font-bold">Total</th>
                       </tr>
                       <tr className="bg-muted border-b border-border">
-                        <th className="border border-border px-2 py-1">Distancia</th>
-                        {[360, 198, 402, 485, 469, 217, 352, 600, 405].map((dist, i) => (
-                          <th key={i} className="border border-border px-2 py-1 font-mono">{dist}</th>
+                        <th className="border border-border px-2 py-1">Ventaja</th>
+                        {holeHandicaps.map((handicap, i) => (
+                          <th key={i} className="border border-border px-2 py-1 font-mono text-purple-700">
+                            {handicap}
+                          </th>
                         ))}
-                        <th className="border border-border px-2 py-1 font-bold">3486</th>
+                        <th className="border border-border px-2 py-1"></th>
                       </tr>
                       <tr className="bg-muted border-b border-border">
                         <th className="border border-border px-2 py-1">Par</th>
-                        {holePars.slice(0, 9).map((par, i) => (
-                          <th key={i} className="border border-border px-2 py-1 font-mono">{par}</th>
+                        {holePars.map((par, i) => (
+                          <th key={i} className="border border-border px-2 py-1 font-mono">
+                            {par}
+                          </th>
                         ))}
-                        <th className="border border-border px-2 py-1 font-bold">{holePars.slice(0, 9).reduce((a, b) => a + b, 0)}</th>
+                        <th className="border border-border px-2 py-1 font-bold">
+                          {holePars.reduce((a, b) => a + b, 0)}
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
                         <td className="border border-border px-2 py-1 font-semibold text-left">Score</td>
-                        {round.players[0]?.scores.slice(0, 9).map((score, i) => {
+                        {round.players[0]?.scores.map((score, i) => {
                           const par = holePars[i];
                           const colorClass = getScoreColor(score, par);
                           return (
@@ -357,50 +363,7 @@ const RondasRegistradas = () => {
                           );
                         })}
                         <td className="border border-border px-2 py-1 font-mono font-bold">
-                          {sumScores(round.players[0]?.scores ?? [], 0, 9)}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                  <table className="w-full border border-border text-center text-sm mt-2">
-                    <thead>
-                      <tr className="bg-muted border-b border-border">
-                        <th className="border border-border px-2 py-1">Hoyo</th>
-                        {holeNumbers.slice(9, 18).map((num) => (
-                          <th key={num} className="border border-border px-2 py-1">{num}</th>
-                        ))}
-                        <th className="border border-border px-2 py-1 font-bold">IN</th>
-                      </tr>
-                      <tr className="bg-muted border-b border-border">
-                        <th className="border border-border px-2 py-1">Distancia</th>
-                        {[458, 162, 419, 463, 585, 334, 465, 207, 570].map((dist, i) => (
-                          <th key={i} className="border border-border px-2 py-1 font-mono">{dist}</th>
-                        ))}
-                        <th className="border border-border px-2 py-1 font-bold">3663</th>
-                      </tr>
-                      <tr className="bg-muted border-b border-border">
-                        <th className="border border-border px-2 py-1">Par</th>
-                        {holePars.slice(9, 18).map((par, i) => (
-                          <th key={i} className="border border-border px-2 py-1 font-mono">{par}</th>
-                        ))}
-                        <th className="border border-border px-2 py-1 font-bold">{holePars.slice(9, 18).reduce((a, b) => a + b, 0)}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="border border-border px-2 py-1 font-semibold text-left">Score</td>
-                        {round.players[0]?.scores.slice(9, 18).map((score, i) => {
-                          const par = holePars[i + 9];
-                          const colorClass = getScoreColor(score, par);
-                          return (
-                            <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
-                              {score !== null ? score : "-"}
-                            </td>
-                          );
-                        })}
-                        <td className="border border-border px-2 py-1 font-mono font-bold">
-                          {sumScores(round.players[0]?.scores ?? [], 9, 18)}
+                          {sumScores(round.players[0]?.scores ?? [], 0, 18)}
                         </td>
                       </tr>
                     </tbody>
