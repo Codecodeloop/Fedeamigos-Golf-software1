@@ -109,6 +109,12 @@ const distributePoints = (
   return pointsMap;
 };
 
+// Get second place players from groups
+const getSecondPlacePlayers = (groups: { value: number; players: string[] }[]) => {
+  if (groups.length < 2) return [];
+  return groups[1].players;
+};
+
 type BetResults = {
   puntosPorHoyo: Record<string, number>;
   puntosBrutoTotal: Record<string, number>;
@@ -119,6 +125,11 @@ type BetResults = {
   ganadoresPorHoyo: Record<number, string[]>; // hoyo index to winners
   ganadoresDesempeno: {
     brutoTotal: string[];
+    netoPrimeros9: string[];
+    netoSegundos9: string[];
+    netoTotal: string[];
+  };
+  segundosMejoresDesempeno: {
     netoPrimeros9: string[];
     netoSegundos9: string[];
     netoTotal: string[];
@@ -219,6 +230,13 @@ const RondasRegistradas = () => {
       netoTotal: sortWithTies(netoTotal)[0]?.players ?? [],
     };
 
+    // Get second place players for neto categories
+    const segundosMejoresDesempeno = {
+      netoPrimeros9: getSecondPlacePlayers(sortWithTies(netoPrimeros9)),
+      netoSegundos9: getSecondPlacePlayers(sortWithTies(netoSegundos9)),
+      netoTotal: getSecondPlacePlayers(sortWithTies(netoTotal)),
+    };
+
     // 3. Puntos por birdies (1 punto por birdie bruto)
     const puntosBirdies: Record<string, number> = {};
     round.players.forEach((player) => {
@@ -244,6 +262,7 @@ const RondasRegistradas = () => {
         puntosBirdies,
         ganadoresPorHoyo,
         ganadoresDesempeno,
+        segundosMejoresDesempeno,
       },
     }));
   };
@@ -331,10 +350,19 @@ const RondasRegistradas = () => {
                           <strong>Score Neto Primeros 9 Hoyos:</strong> {betResults.ganadoresDesempeno.netoPrimeros9.join(", ")}
                         </li>
                         <li>
+                          <strong>Segundo Mejor Neto Primeros 9 Hoyos:</strong> {betResults.segundosMejoresDesempeno.netoPrimeros9.join(", ")}
+                        </li>
+                        <li>
                           <strong>Score Neto Segundos 9 Hoyos:</strong> {betResults.ganadoresDesempeno.netoSegundos9.join(", ")}
                         </li>
                         <li>
+                          <strong>Segundo Mejor Neto Segundos 9 Hoyos:</strong> {betResults.segundosMejoresDesempeno.netoSegundos9.join(", ")}
+                        </li>
+                        <li>
                           <strong>Score Neto Total 18 Hoyos:</strong> {betResults.ganadoresDesempeno.netoTotal.join(", ")}
+                        </li>
+                        <li>
+                          <strong>Segundo Mejor Neto Total 18 Hoyos:</strong> {betResults.segundosMejoresDesempeno.netoTotal.join(", ")}
                         </li>
                       </ul>
                     </div>
