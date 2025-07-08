@@ -11,15 +11,15 @@ import {
 
 const ReglasAntiguas = () => {
   return (
-    <div className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
-      <Card className="max-w-4xl mx-auto">
+    <div className="min-h-screen p-6 bg-[#f9f7f1] text-[#1a1a1a] font-serif">
+      <Card className="max-w-4xl mx-auto bg-white dark:bg-gray-50">
         <CardHeader>
           <CardTitle className="text-2xl">🏌 REGLAS DE JUEGO Y APUESTAS – GRUPO DE GOLF</CardTitle>
-          <CardDescription className="mt-2 text-base">
+          <CardDescription className="mt-2 text-base text-gray-700 dark:text-gray-800">
             Reglas oficiales para la distribución de puntos y desempates en el grupo de golf.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6 text-gray-800 dark:text-gray-200">
+        <CardContent className="space-y-6">
           <section>
             <h2 className="text-lg font-semibold mb-2">1. 🎯 TOTAL DE PUNTOS A REPARTIR</h2>
             <ul className="list-disc list-inside space-y-1">
