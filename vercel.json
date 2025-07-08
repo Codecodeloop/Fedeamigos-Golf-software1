@@ -1,9 +1,5 @@
 {
-  "build": {
-    "env": {},
-    "commands": {
-      "install": "pnpm install --no-frozen-lockfile",
-      "build": "vite build"
-    }
-  }
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "buildCommand": "vite build",
+  "outputDirectory": "dist"
 }
