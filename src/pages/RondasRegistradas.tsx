@@ -281,6 +281,32 @@ const RondasRegistradas = () => {
     return "bg-blue-400 text-white"; // Other
   };
 
+  // Calcular puntos totales sumando todas las categorías para cada jugador
+  const calcularPuntosTotales = (betResults: BetResults) => {
+    const jugadores = new Set<string>([
+      ...Object.keys(betResults.puntosPorHoyo),
+      ...Object.keys(betResults.puntosBrutoTotal),
+      ...Object.keys(betResults.puntosNetoPrimeros9),
+      ...Object.keys(betResults.puntosNetoSegundos9),
+      ...Object.keys(betResults.puntosNetoTotal),
+      ...Object.keys(betResults.puntosBirdies),
+    ]);
+
+    const totales: Record<string, number> = {};
+
+    jugadores.forEach((jugador) => {
+      totales[jugador] =
+        (betResults.puntosPorHoyo[jugador] ?? 0) +
+        (betResults.puntosBrutoTotal[jugador] ?? 0) +
+        (betResults.puntosNetoPrimeros9[jugador] ?? 0) +
+        (betResults.puntosNetoSegundos9[jugador] ?? 0) +
+        (betResults.puntosNetoTotal[jugador] ?? 0) +
+        (betResults.puntosBirdies[jugador] ?? 0);
+    });
+
+    return totales;
+  };
+
   return (
     <div className="min-h-screen p-6 bg-[#f9f7f1] text-[#1a1a1a] font-serif max-w-6xl mx-auto">
       <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -315,6 +341,8 @@ const RondasRegistradas = () => {
               return <p className="text-center text-red-600">Ronda no encontrada.</p>;
             }
             const betResults = betResultsByRound[round.id] ?? null;
+
+            const puntosTotales = betResults ? calcularPuntosTotales(betResults) : {};
 
             return (
               <div className="space-y-8">
@@ -376,6 +404,21 @@ const RondasRegistradas = () => {
                           {Object.entries(betResults.puntosBirdies).map(([player, puntos]) => (
                             <li key={player}>
                               {player}: {puntos.toFixed(2)}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+
+                    <div className="mt-6 border-t border-border pt-4">
+                      <h4 className="font-semibold mb-2">Resumen Total de Puntos por Jugador</h4>
+                      {Object.keys(puntosTotales).length === 0 ? (
+                        <p>No hay puntos calculados.</p>
+                      ) : (
+                        <ul className="list-disc list-inside">
+                          {Object.entries(puntosTotales).map(([player, total]) => (
+                            <li key={player}>
+                              {player}: {total.toFixed(2)} puntos
                             </li>
                           ))}
                         </ul>
