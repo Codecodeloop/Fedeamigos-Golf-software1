@@ -40,14 +40,40 @@ const calculateNetScores = (scores: (number | null)[], playerHandicap: number | 
   const handicap75 =
     decimalPart <= 0.5 ? Math.floor(rawHandicap75) : Math.ceil(rawHandicap75);
 
+  // Distribute strokes per hole
+  // If handicap75 <= 18, assign 1 stroke to holes with holeHandicap <= handicap75
+  // If handicap75 > 18, assign 1 stroke to all holes, then assign extra strokes to holes with lowest handicap rating
+  const strokesPerHole = new Array(18).fill(0);
+
+  if (handicap75 <= 18) {
+    for (let i = 0; i < 18; i++) {
+      if (holeHandicaps[i] <= handicap75) {
+        strokesPerHole[i] = 1;
+      }
+    }
+  } else {
+    // Assign 1 stroke to all holes
+    for (let i = 0; i < 18; i++) {
+      strokesPerHole[i] = 1;
+    }
+    // Assign extra strokes to holes with lowest handicap rating
+    const extraStrokes = handicap75 - 18;
+
+    // Sort holes by handicap rating ascending (lowest first)
+    const holesSortedByHandicap = holeHandicaps
+      .map((handicap, index) => ({ handicap, index }))
+      .sort((a, b) => a.handicap - b.handicap);
+
+    for (let i = 0; i < extraStrokes; i++) {
+      const holeIndex = holesSortedByHandicap[i].index;
+      strokesPerHole[holeIndex] += 1;
+    }
+  }
+
+  // Calculate net scores subtracting strokes per hole
   return scores.map((score, index) => {
     if (score === null) return null;
-    const holeHandicap = holeHandicaps[index];
-    let strokesToSubtract = 0;
-    if (holeHandicap <= handicap75) {
-      strokesToSubtract = 1;
-    }
-    const netScore = score - strokesToSubtract;
+    const netScore = score - strokesPerHole[index];
     return netScore > 0 ? netScore : 0;
   });
 };
