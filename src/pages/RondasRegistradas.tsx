@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Button } from "../components/ui/button";
 import { useRondas } from "../context/RondasContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Added import
 
 // Handicap difficulty per hole (1 = hardest, 18 = easiest)
 const holeHandicaps = [
