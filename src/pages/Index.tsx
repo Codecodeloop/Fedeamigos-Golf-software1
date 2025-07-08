@@ -16,7 +16,7 @@ const Index = () => {
         The Timeless Art of Vibe Coding
       </p>
 
-      <div className="flex flex-col space-y-6 w-full max-w-xs">
+      <div className="flex flex-col space-y-6 w-full max-w-lg">
         <Button
           variant="outline"
           className="text-xl font-serif py-4 px-6"
