@@ -271,6 +271,7 @@ const RondasRegistradas = () => {
 
     // 3. Puntos por birdies (1 punto por birdie bruto)
     const puntosBirdies: Record<string, number> = {};
+    let totalBirdiesPoints = 0;
     round.players.forEach((player) => {
       let birdiesCount = 0;
       player.scores.forEach((score, i) => {
@@ -280,6 +281,7 @@ const RondasRegistradas = () => {
       });
       if (birdiesCount > 0) {
         puntosBirdies[player.name] = birdiesCount;
+        totalBirdiesPoints += birdiesCount;
       }
     });
 
@@ -297,7 +299,13 @@ const RondasRegistradas = () => {
         segundosMejoresDesempeno,
       },
     }));
+
+    // Guardar totalBirdiesPoints para usar en renderizado
+    setTotalBirdies(totalBirdiesPoints);
   };
+
+  // Estado para total de puntos por birdies
+  const [totalBirdies, setTotalBirdies] = useState(0);
 
   // Helper para colorear el score según la leyenda
   const getScoreColor = (score: number | null, par: number) => {
@@ -396,6 +404,15 @@ const RondasRegistradas = () => {
             const baseValue = parseFloat(baseValueInput);
             const puntosTotales = betResults && !isNaN(baseValue) ? calcularPuntosTotales(betResults, allPlayerNames) : {};
 
+            // Calcular valor total aportado por todos los jugadores
+            const totalAportado = !isNaN(baseValue) && baseValue > 0 ? baseValue * allPlayerNames.length : 0;
+
+            // Total de puntos a repartir: 30 fijos + puntos por birdies
+            const totalPuntos = 30 + totalBirdies;
+
+            // Valor del punto
+            const valorDelPunto = totalPuntos > 0 ? totalAportado / totalPuntos : 0;
+
             return (
               <div className="space-y-8">
                 <div className="flex justify-between items-center">
@@ -462,7 +479,16 @@ const RondasRegistradas = () => {
                     <div className="mt-6 border-t border-border pt-4">
                       <h4 className="font-semibold mb-2">Resumen Total de Puntos y Dinero por Jugador</h4>
                       <p className="mb-2 text-sm text-muted-foreground">
-                        Valor del punto: ${formatCurrency(baseValue)}
+                        Valor base por jugador: ${baseValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <p className="mb-4 text-sm text-muted-foreground">
+                        Total aportado por todos los jugadores: ${totalAportado.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <p className="mb-4 text-sm text-muted-foreground">
+                        Total de puntos a repartir (30 + birdies): {totalPuntos}
+                      </p>
+                      <p className="mb-4 text-sm text-muted-foreground font-semibold">
+                        Valor del punto: ${valorDelPunto.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                       {allPlayerNames.length === 0 ? (
                         <p>No hay jugadores registrados.</p>
@@ -470,10 +496,10 @@ const RondasRegistradas = () => {
                         <ul className="list-disc list-inside">
                           {allPlayerNames.map((player) => {
                             const puntos = puntosTotales[player] ?? 0;
-                            const dinero = puntos * baseValue;
+                            const dinero = puntos * valorDelPunto;
                             return (
                               <li key={player}>
-                                {player}: {puntos.toFixed(2)} puntos - ${formatCurrency(dinero)}
+                                {player}: {puntos.toFixed(2)} puntos - ${dinero.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </li>
                             );
                           })}
