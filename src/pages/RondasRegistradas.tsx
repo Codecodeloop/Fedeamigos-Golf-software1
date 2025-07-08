@@ -122,6 +122,7 @@ const RondasRegistradas = () => {
   const { rounds } = useRondas();
   const navigate = useNavigate();
 
+  const [selectedRoundId, setSelectedRoundId] = useState<number | null>(null);
   const [betResultsByRound, setBetResultsByRound] = useState<Record<number, BetResults | null>>({});
 
   const calcularApuestas = (roundId: number) => {
@@ -268,179 +269,195 @@ const RondasRegistradas = () => {
 
   return (
     <div className="min-h-screen p-6 bg-[#f9f7f1] text-[#1a1a1a] font-serif max-w-6xl mx-auto">
-      <header className="mb-6">
+      <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-bold">Rondas Registradas</h1>
-        <p className="text-gray-600 mb-4">Lista de todas las rondas de golf registradas en esta sesión.</p>
+        <div>
+          <label htmlFor="round-select" className="mr-2 font-semibold">
+            Seleccionar fecha de ronda:
+          </label>
+          <select
+            id="round-select"
+            className="border border-border rounded px-3 py-1"
+            value={selectedRoundId ?? ""}
+            onChange={(e) => setSelectedRoundId(e.target.value ? Number(e.target.value) : null)}
+          >
+            <option value="">-- Seleccione una ronda --</option>
+            {rounds.map((round) => (
+              <option key={round.id} value={round.id}>
+                {round.date}
+              </option>
+            ))}
+          </select>
+        </div>
       </header>
 
-      {rounds.length === 0 ? (
-        <p>No hay rondas registradas.</p>
+      {selectedRoundId === null ? (
+        <p className="text-center text-muted-foreground">Por favor, selecciona una ronda para visualizar.</p>
       ) : (
-        <div className="space-y-10">
-          {rounds.map((round) => {
+        <>
+          {(() => {
+            const round = rounds.find((r) => r.id === selectedRoundId);
+            if (!round) {
+              return <p className="text-center text-red-600">Ronda no encontrada.</p>;
+            }
             const betResults = betResultsByRound[round.id] ?? null;
 
             return (
-              <div key={round.id} className="border border-border rounded p-4 bg-white shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-xl border-b border-border pb-2">
-                    Fecha: {round.date}
-                  </h3>
+              <div className="space-y-8">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-semibold">Ronda del día: {round.date}</h2>
                   <Button size="sm" onClick={() => calcularApuestas(round.id)}>
                     Calcular Apuestas
                   </Button>
                 </div>
 
-                {round.players[0] && (
-                  <div className="mb-4 text-left space-y-1">
-                    <p>
-                      <strong>Jugador:</strong> {round.players[0].name}
-                    </p>
-                    <p>
-                      <strong>Handicap:</strong>{" "}
-                      {round.players[0].handicap !== null ? round.players[0].handicap.toFixed(1) : "-"}
-                    </p>
-                    <p>
-                      <strong>Handicap al 75%:</strong>{" "}
-                      {round.players[0].handicap !== null
-                        ? (() => {
-                            const rawHandicap75 = round.players[0].handicap * 0.75;
-                            const decimalPart = rawHandicap75 - Math.floor(rawHandicap75);
-                            const handicap75 =
-                              decimalPart <= 0.5 ? Math.floor(rawHandicap75) : Math.ceil(rawHandicap75);
-                            return handicap75.toString();
-                          })()
-                        : "-"}
-                    </p>
-                  </div>
-                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {round.players.map((player) => {
+                    const netScores = calculateNetScores(player.scores, player.handicap);
+                    const handicap75 = (() => {
+                      if (player.handicap === null) return "-";
+                      const rawHandicap75 = player.handicap * 0.75;
+                      const decimalPart = rawHandicap75 - Math.floor(rawHandicap75);
+                      return decimalPart <= 0.5
+                        ? Math.floor(rawHandicap75)
+                        : Math.ceil(rawHandicap75);
+                    })();
 
-                {betResults && (
-                  <div className="mb-6">
-                    <h4 className="font-semibold mb-3 text-lg">Resultados de Apuestas</h4>
+                    return (
+                      <div
+                        key={player.name}
+                        className="border border-border rounded p-4 bg-white shadow-sm"
+                      >
+                        <h3 className="text-xl font-semibold mb-2">{player.name}</h3>
+                        <p>
+                          <strong>Handicap:</strong>{" "}
+                          {player.handicap !== null ? player.handicap.toFixed(1) : "-"}
+                        </p>
+                        <p>
+                          <strong>Handicap al 75%:</strong> {handicap75}
+                        </p>
 
-                    <h5 className="font-semibold mt-2 mb-1">Puntos por Hoyo Ganado (18 puntos)</h5>
-                    {renderPointsTable(betResults.puntosPorHoyo, "Jugador")}
+                        {betResults && (
+                          <div className="mb-4">
+                            <h4 className="font-semibold mb-2 text-lg">Resultados de Apuestas</h4>
 
-                    <h5 className="font-semibold mt-4 mb-1">Puntos por Desempeño Global (12 puntos)</h5>
-                    <h6 className="font-semibold mt-2 mb-1">Score Bruto Total (2 puntos al menor)</h6>
-                    {renderPointsTable(betResults.puntosBrutoTotal, "Jugador")}
+                            <h5 className="font-semibold mt-2 mb-1">Puntos por Hoyo Ganado</h5>
+                            <p>
+                              {betResults.puntosPorHoyo[player.name]
+                                ? betResults.puntosPorHoyo[player.name].toFixed(2)
+                                : "0"}
+                            </p>
 
-                    <h6 className="font-semibold mt-2 mb-1">Score Neto Primeros 9 Hoyos (2 puntos al menor, 1 al segundo menor)</h6>
-                    {renderPointsTable(betResults.puntosNetoPrimeros9, "Jugador")}
+                            <h5 className="font-semibold mt-2 mb-1">Puntos por Desempeño Global</h5>
+                            <ul className="list-disc list-inside">
+                              <li>
+                                Score Bruto Total:{" "}
+                                {betResults.puntosBrutoTotal[player.name]
+                                  ? betResults.puntosBrutoTotal[player.name].toFixed(2)
+                                  : "0"}
+                              </li>
+                              <li>
+                                Score Neto Primeros 9 Hoyos:{" "}
+                                {betResults.puntosNetoPrimeros9[player.name]
+                                  ? betResults.puntosNetoPrimeros9[player.name].toFixed(2)
+                                  : "0"}
+                              </li>
+                              <li>
+                                Score Neto Segundos 9 Hoyos:{" "}
+                                {betResults.puntosNetoSegundos9[player.name]
+                                  ? betResults.puntosNetoSegundos9[player.name].toFixed(2)
+                                  : "0"}
+                              </li>
+                              <li>
+                                Score Neto Total 18 Hoyos:{" "}
+                                {betResults.puntosNetoTotal[player.name]
+                                  ? betResults.puntosNetoTotal[player.name].toFixed(2)
+                                  : "0"}
+                              </li>
+                            </ul>
 
-                    <h6 className="font-semibold mt-2 mb-1">Score Neto Segundos 9 Hoyos (2 puntos al menor, 1 al segundo menor)</h6>
-                    {renderPointsTable(betResults.puntosNetoSegundos9, "Jugador")}
+                            <h5 className="font-semibold mt-2 mb-1">Puntos por Birdies</h5>
+                            <p>
+                              {betResults.puntosBirdies[player.name]
+                                ? betResults.puntosBirdies[player.name].toFixed(2)
+                                : "0"}
+                            </p>
+                          </div>
+                        )}
 
-                    <h6 className="font-semibold mt-2 mb-1">Score Neto Total 18 Hoyos (3 puntos al menor, 1 al segundo menor)</h6>
-                    {renderPointsTable(betResults.puntosNetoTotal, "Jugador")}
-
-                    <h5 className="font-semibold mt-4 mb-1">Puntos por Birdies (1 punto por birdie bruto)</h5>
-                    {renderPointsTable(betResults.puntosBirdies, "Jugador")}
-                  </div>
-                )}
-
-                <div>
-                  {/* Tabla de scores con formato y colores, manteniendo estructura original */}
-                  <table className="w-full border border-border text-center text-sm">
-                    <thead>
-                      <tr className="bg-muted border-b border-border">
-                        <th className="border border-border px-2 py-1">Hoyo</th>
-                        {holeNumbers.map((num) => (
-                          <th key={num} className="border border-border px-2 py-1">{num}</th>
-                        ))}
-                        <th className="border border-border px-2 py-1 font-bold">Total</th>
-                      </tr>
-                      <tr className="bg-muted border-b border-border">
-                        <th className="border border-border px-2 py-1">Ventaja</th>
-                        {holeHandicaps.map((handicap, i) => (
-                          <th key={i} className="border border-border px-2 py-1 font-mono text-purple-700">
-                            {handicap}
-                          </th>
-                        ))}
-                        <th className="border border-border px-2 py-1"></th>
-                      </tr>
-                      <tr className="bg-muted border-b border-border">
-                        <th className="border border-border px-2 py-1">Par</th>
-                        {holePars.map((par, i) => (
-                          <th key={i} className="border border-border px-2 py-1 font-mono">
-                            {par}
-                          </th>
-                        ))}
-                        <th className="border border-border px-2 py-1 font-bold">
-                          {holePars.reduce((a, b) => a + b, 0)}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="border border-border px-2 py-1 font-semibold text-left">Score</td>
-                        {round.players[0]?.scores.map((score, i) => {
-                          const par = holePars[i];
-                          const colorClass = getScoreColor(score, par);
-                          return (
-                            <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
-                              {score !== null ? score : "-"}
-                            </td>
-                          );
-                        })}
-                        <td className="border border-border px-2 py-1 font-mono font-bold">
-                          {sumScores(round.players[0]?.scores ?? [], 0, 18)}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="border border-border px-2 py-1 font-semibold text-left">Score Neto</td>
-                        {round.players[0] ? (() => {
-                          const netScores = calculateNetScores(round.players[0].scores, round.players[0].handicap);
-                          return netScores.map((score, i) => {
-                            const par = holePars[i];
-                            const colorClass = getScoreColor(score, par);
-                            return (
-                              <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
-                                {score !== null ? score : "-"}
-                              </td>
-                            );
-                          });
-                        })() : null}
-                        <td className="border border-border px-2 py-1 font-mono font-bold">
-                          {round.players[0] ? sumScores(calculateNetScores(round.players[0].scores, round.players[0].handicap), 0, 18) : 0}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                  {/* Leyenda */}
-                  <div className="mt-4 flex flex-wrap gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <div className="w-5 h-5 bg-blue-900 border border-black"></div>
-                      <span>Eagle</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-5 h-5 bg-red-600 border border-black"></div>
-                      <span>Birdie</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-5 h-5 bg-white border border-black"></div>
-                      <span>Par</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-5 h-5 bg-green-700 border border-black"></div>
-                      <span>Bogey</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-5 h-5 bg-yellow-800 border border-black"></div>
-                      <span>Double Bogey</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-5 h-5 bg-blue-400 border border-black"></div>
-                      <span>Other</span>
-                    </div>
-                  </div>
+                        <div className="overflow-x-auto">
+                          <table className="w-full border border-border text-center text-sm">
+                            <thead>
+                              <tr className="bg-muted border-b border-border">
+                                <th className="border border-border px-2 py-1">Hoyo</th>
+                                {holeNumbers.map((num) => (
+                                  <th key={num} className="border border-border px-2 py-1">{num}</th>
+                                ))}
+                                <th className="border border-border px-2 py-1 font-bold">Total</th>
+                              </tr>
+                              <tr className="bg-muted border-b border-border">
+                                <th className="border border-border px-2 py-1">Ventaja</th>
+                                {holeHandicaps.map((handicap, i) => (
+                                  <th key={i} className="border border-border px-2 py-1 font-mono text-purple-700">
+                                    {handicap}
+                                  </th>
+                                ))}
+                                <th className="border border-border px-2 py-1"></th>
+                              </tr>
+                              <tr className="bg-muted border-b border-border">
+                                <th className="border border-border px-2 py-1">Par</th>
+                                {holePars.map((par, i) => (
+                                  <th key={i} className="border border-border px-2 py-1 font-mono">
+                                    {par}
+                                  </th>
+                                ))}
+                                <th className="border border-border px-2 py-1 font-bold">
+                                  {holePars.reduce((a, b) => a + b, 0)}
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td className="border border-border px-2 py-1 font-semibold text-left">Score</td>
+                                {player.scores.map((score, i) => {
+                                  const par = holePars[i];
+                                  const colorClass = getScoreColor(score, par);
+                                  return (
+                                    <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
+                                      {score !== null ? score : "-"}
+                                    </td>
+                                  );
+                                })}
+                                <td className="border border-border px-2 py-1 font-mono font-bold">
+                                  {sumScores(player.scores, 0, 18)}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td className="border border-border px-2 py-1 font-semibold text-left">Score Neto</td>
+                                {netScores.map((score, i) => {
+                                  const par = holePars[i];
+                                  const colorClass = getScoreColor(score, par);
+                                  return (
+                                    <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
+                                      {score !== null ? score : "-"}
+                                    </td>
+                                  );
+                                })}
+                                <td className="border border-border px-2 py-1 font-mono font-bold">
+                                  {sumScores(netScores, 0, 18)}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
-          })}
-        </div>
+          })()}
+        </>
       )}
 
       <div className="pt-6 flex gap-2">
