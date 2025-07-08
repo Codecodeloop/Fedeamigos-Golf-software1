@@ -69,7 +69,7 @@ const RondasRegistradas = () => {
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6 bg-[#f9f7f1] text-[#1a1a1a] font-serif">
       <Card>
         <CardHeader>
           <CardTitle>Rondas Registradas</CardTitle>
