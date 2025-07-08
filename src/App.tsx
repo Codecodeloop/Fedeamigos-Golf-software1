@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import RegistroRonda from "./pages/RegistroRonda";
 import RondasRegistradas from "./pages/RondasRegistradas";
 import Reglas from "./pages/Reglas";
+import ReglasAntiguas from "./pages/ReglasAntiguas";
 import { RondasProvider } from "./context/RondasContext";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/reglas" element={<Reglas />} />
+            <Route path="/reglas-antiguas" element={<ReglasAntiguas />} />
             <Route path="/registro-ronda" element={<RegistroRonda />} />
             <Route path="/rondas-registradas" element={<RondasRegistradas />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

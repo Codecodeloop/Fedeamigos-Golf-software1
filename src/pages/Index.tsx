@@ -22,7 +22,7 @@ const Index = () => {
         <Button
           variant="outline"
           className="text-xl font-serif py-4 px-6"
-          onClick={() => navigate("/reglas")}
+          onClick={() => navigate("/reglas-antiguas")}
         >
           Reglas del Juego y Apuestas
         </Button>
