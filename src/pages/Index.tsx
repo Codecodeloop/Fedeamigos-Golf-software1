@@ -13,7 +13,9 @@ const Index = () => {
         FEDE VINO
       </h1>
       <p className="text-xl italic text-[#4a4a4a] mb-12 max-w-md">
-        The Timeless Art of Vibe Coding
+        Federacion de golf
+        <br />
+        Club campestre de Bucaramanga
       </p>
 
       <div className="flex flex-col space-y-6 w-full max-w-lg">
