@@ -281,20 +281,12 @@ const RondasRegistradas = () => {
     return "bg-blue-400 text-white"; // Other
   };
 
-  // Calcular puntos totales sumando todas las categorías para cada jugador
-  const calcularPuntosTotales = (betResults: BetResults) => {
-    const jugadores = new Set<string>([
-      ...Object.keys(betResults.puntosPorHoyo),
-      ...Object.keys(betResults.puntosBrutoTotal),
-      ...Object.keys(betResults.puntosNetoPrimeros9),
-      ...Object.keys(betResults.puntosNetoSegundos9),
-      ...Object.keys(betResults.puntosNetoTotal),
-      ...Object.keys(betResults.puntosBirdies),
-    ]);
-
+  // Calcular puntos totales sumando todas las categorías para cada jugador,
+  // incluyendo a todos los jugadores aunque no tengan puntos (0)
+  const calcularPuntosTotales = (betResults: BetResults, allPlayers: string[]) => {
     const totales: Record<string, number> = {};
 
-    jugadores.forEach((jugador) => {
+    allPlayers.forEach((jugador) => {
       totales[jugador] =
         (betResults.puntosPorHoyo[jugador] ?? 0) +
         (betResults.puntosBrutoTotal[jugador] ?? 0) +
@@ -342,7 +334,8 @@ const RondasRegistradas = () => {
             }
             const betResults = betResultsByRound[round.id] ?? null;
 
-            const puntosTotales = betResults ? calcularPuntosTotales(betResults) : {};
+            const allPlayerNames = round.players.map((p) => p.name);
+            const puntosTotales = betResults ? calcularPuntosTotales(betResults, allPlayerNames) : {};
 
             return (
               <div className="space-y-8">
@@ -412,13 +405,13 @@ const RondasRegistradas = () => {
 
                     <div className="mt-6 border-t border-border pt-4">
                       <h4 className="font-semibold mb-2">Resumen Total de Puntos por Jugador</h4>
-                      {Object.keys(puntosTotales).length === 0 ? (
-                        <p>No hay puntos calculados.</p>
+                      {allPlayerNames.length === 0 ? (
+                        <p>No hay jugadores registrados.</p>
                       ) : (
                         <ul className="list-disc list-inside">
-                          {Object.entries(puntosTotales).map(([player, total]) => (
+                          {allPlayerNames.map((player) => (
                             <li key={player}>
-                              {player}: {total.toFixed(2)} puntos
+                              {player}: {puntosTotales[player]?.toFixed(2) ?? "0.00"} puntos
                             </li>
                           ))}
                         </ul>
