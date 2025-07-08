@@ -331,6 +331,11 @@ const RondasRegistradas = () => {
     return totales;
   };
 
+  // Formatear número con separadores de miles
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
   return (
     <div className="min-h-screen p-6 bg-[#f9f7f1] text-[#1a1a1a] font-serif max-w-6xl mx-auto">
       <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -368,7 +373,7 @@ const RondasRegistradas = () => {
             value={baseValueInput}
             onChange={(e) => setBaseValueInput(e.target.value)}
             className="border border-border rounded px-3 py-1 w-32"
-            placeholder="Ej: 10000"
+            placeholder="Ej: 10,000"
           />
           <Button onClick={() => selectedRoundId !== null && calcularApuestas(selectedRoundId)}>
             Calcular Apuestas
@@ -456,16 +461,19 @@ const RondasRegistradas = () => {
 
                     <div className="mt-6 border-t border-border pt-4">
                       <h4 className="font-semibold mb-2">Resumen Total de Puntos y Dinero por Jugador</h4>
+                      <p className="mb-2 text-sm text-muted-foreground">
+                        Valor del punto: ${formatCurrency(baseValue)}
+                      </p>
                       {allPlayerNames.length === 0 ? (
                         <p>No hay jugadores registrados.</p>
                       ) : (
                         <ul className="list-disc list-inside">
                           {allPlayerNames.map((player) => {
                             const puntos = puntosTotales[player] ?? 0;
-                            const dinero = !isNaN(baseValue) ? puntos * baseValue : 0;
+                            const dinero = puntos * baseValue;
                             return (
                               <li key={player}>
-                                {player}: {puntos.toFixed(2)} puntos - ${dinero.toFixed(2)}
+                                {player}: {puntos.toFixed(2)} puntos - ${formatCurrency(dinero)}
                               </li>
                             );
                           })}
