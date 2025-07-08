@@ -368,6 +368,12 @@ const RondasRegistradas = () => {
                         : Math.ceil(rawHandicap75);
                     })();
 
+                    const outTotal = sumScores(player.scores, 0, 9);
+                    const inTotal = sumScores(player.scores, 9, 18);
+
+                    const netOutTotal = sumScores(netScores, 0, 9);
+                    const netInTotal = sumScores(netScores, 9, 18);
+
                     return (
                       <div
                         key={player.name}
@@ -435,27 +441,50 @@ const RondasRegistradas = () => {
                             <thead>
                               <tr className="bg-muted border-b border-border">
                                 <th className="border border-border px-2 py-1">Hoyo</th>
-                                {holeNumbers.map((num) => (
+                                {holeNumbers.slice(0, 9).map((num) => (
                                   <th key={num} className="border border-border px-2 py-1">{num}</th>
                                 ))}
+                                <th className="border border-border px-2 py-1 font-bold">OUT</th>
+                                {holeNumbers.slice(9).map((num) => (
+                                  <th key={num} className="border border-border px-2 py-1">{num}</th>
+                                ))}
+                                <th className="border border-border px-2 py-1 font-bold">IN</th>
                                 <th className="border border-border px-2 py-1 font-bold">Total</th>
                               </tr>
                               <tr className="bg-muted border-b border-border">
                                 <th className="border border-border px-2 py-1">Ventaja</th>
-                                {holeHandicaps.map((handicap, i) => (
+                                {holeHandicaps.slice(0, 9).map((handicap, i) => (
                                   <th key={i} className="border border-border px-2 py-1 font-mono text-purple-700">
                                     {handicap}
                                   </th>
                                 ))}
                                 <th className="border border-border px-2 py-1"></th>
+                                {holeHandicaps.slice(9).map((handicap, i) => (
+                                  <th key={i} className="border border-border px-2 py-1 font-mono text-purple-700">
+                                    {handicap}
+                                  </th>
+                                ))}
+                                <th className="border border-border px-2 py-1"></th>
+                                <th className="border border-border px-2 py-1"></th>
                               </tr>
                               <tr className="bg-muted border-b border-border">
                                 <th className="border border-border px-2 py-1">Par</th>
-                                {holePars.map((par, i) => (
+                                {holePars.slice(0, 9).map((par, i) => (
                                   <th key={i} className="border border-border px-2 py-1 font-mono">
                                     {par}
                                   </th>
                                 ))}
+                                <th className="border border-border px-2 py-1 font-bold">
+                                  {holePars.slice(0, 9).reduce((a, b) => a + b, 0)}
+                                </th>
+                                {holePars.slice(9).map((par, i) => (
+                                  <th key={i} className="border border-border px-2 py-1 font-mono">
+                                    {par}
+                                  </th>
+                                ))}
+                                <th className="border border-border px-2 py-1 font-bold">
+                                  {holePars.slice(9).reduce((a, b) => a + b, 0)}
+                                </th>
                                 <th className="border border-border px-2 py-1 font-bold">
                                   {holePars.reduce((a, b) => a + b, 0)}
                                 </th>
@@ -464,7 +493,7 @@ const RondasRegistradas = () => {
                             <tbody>
                               <tr>
                                 <td className="border border-border px-2 py-1 font-semibold text-left">Score</td>
-                                {player.scores.map((score, i) => {
+                                {player.scores.slice(0, 9).map((score, i) => {
                                   const par = holePars[i];
                                   const colorClass = getScoreColor(score, par);
                                   return (
@@ -474,12 +503,27 @@ const RondasRegistradas = () => {
                                   );
                                 })}
                                 <td className="border border-border px-2 py-1 font-mono font-bold">
+                                  {outTotal}
+                                </td>
+                                {player.scores.slice(9).map((score, i) => {
+                                  const par = holePars[i + 9];
+                                  const colorClass = getScoreColor(score, par);
+                                  return (
+                                    <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
+                                      {score !== null ? score : "-"}
+                                    </td>
+                                  );
+                                })}
+                                <td className="border border-border px-2 py-1 font-mono font-bold">
+                                  {inTotal}
+                                </td>
+                                <td className="border border-border px-2 py-1 font-mono font-bold">
                                   {sumScores(player.scores, 0, 18)}
                                 </td>
                               </tr>
                               <tr>
                                 <td className="border border-border px-2 py-1 font-semibold text-left">Score Neto</td>
-                                {netScores.map((score, i) => {
+                                {netScores.slice(0, 9).map((score, i) => {
                                   const par = holePars[i];
                                   const colorClass = getScoreColor(score, par);
                                   return (
@@ -488,6 +532,21 @@ const RondasRegistradas = () => {
                                     </td>
                                   );
                                 })}
+                                <td className="border border-border px-2 py-1 font-mono font-bold">
+                                  {netOutTotal}
+                                </td>
+                                {netScores.slice(9).map((score, i) => {
+                                  const par = holePars[i + 9];
+                                  const colorClass = getScoreColor(score, par);
+                                  return (
+                                    <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
+                                      {score !== null ? score : "-"}
+                                    </td>
+                                  );
+                                })}
+                                <td className="border border-border px-2 py-1 font-mono font-bold">
+                                  {netInTotal}
+                                </td>
                                 <td className="border border-border px-2 py-1 font-mono font-bold">
                                   {sumScores(netScores, 0, 18)}
                                 </td>
