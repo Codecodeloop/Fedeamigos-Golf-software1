@@ -116,6 +116,13 @@ type BetResults = {
   puntosNetoSegundos9: Record<string, number>;
   puntosNetoTotal: Record<string, number>;
   puntosBirdies: Record<string, number>;
+  ganadoresPorHoyo: Record<number, string[]>; // hoyo index to winners
+  ganadoresDesempeno: {
+    brutoTotal: string[];
+    netoPrimeros9: string[];
+    netoSegundos9: string[];
+    netoTotal: string[];
+  };
 };
 
 const RondasRegistradas = () => {
@@ -134,6 +141,8 @@ const RondasRegistradas = () => {
 
     // 1. Puntos por hoyo ganado (18 puntos)
     const puntosPorHoyo: Record<string, number> = {};
+    const ganadoresPorHoyo: Record<number, string[]> = {};
+
     for (let hoyo = 0; hoyo < 18; hoyo++) {
       const scoresHoyo = round.players.map((player) => {
         const netScores = calculateNetScores(player.scores, player.handicap);
@@ -169,6 +178,8 @@ const RondasRegistradas = () => {
       ganadores.forEach((g) => {
         puntosPorHoyo[g] = (puntosPorHoyo[g] ?? 0) + 1;
       });
+
+      ganadoresPorHoyo[hoyo + 1] = ganadores; // Store winners for display (hoyo 1-based)
     }
 
     // 2. Puntos por desempeño global (12 puntos)
@@ -200,6 +211,14 @@ const RondasRegistradas = () => {
     const puntosNetoSegundos9 = distributePoints(sortWithTies(netoSegundos9), 2, 1);
     const puntosNetoTotal = distributePoints(sortWithTies(netoTotal), 3, 1);
 
+    // Get winners for each category (lowest score)
+    const ganadoresDesempeno = {
+      brutoTotal: sortWithTies(brutoTotal)[0]?.players ?? [],
+      netoPrimeros9: sortWithTies(netoPrimeros9)[0]?.players ?? [],
+      netoSegundos9: sortWithTies(netoSegundos9)[0]?.players ?? [],
+      netoTotal: sortWithTies(netoTotal)[0]?.players ?? [],
+    };
+
     // 3. Puntos por birdies (1 punto por birdie bruto)
     const puntosBirdies: Record<string, number> = {};
     round.players.forEach((player) => {
@@ -223,34 +242,10 @@ const RondasRegistradas = () => {
         puntosNetoSegundos9,
         puntosNetoTotal,
         puntosBirdies,
+        ganadoresPorHoyo,
+        ganadoresDesempeno,
       },
     }));
-  };
-
-  // Helper para mostrar puntos en tabla
-  const renderPointsTable = (pointsMap: Record<string, number>, title: string) => {
-    const entries = Object.entries(pointsMap);
-    if (entries.length === 0) {
-      return <p className="text-sm italic text-muted-foreground">No hay puntos asignados.</p>;
-    }
-    return (
-      <table className="w-full border border-border text-sm mb-4">
-        <thead>
-          <tr className="bg-muted">
-            <th className="border border-border px-2 py-1 text-left">{title}</th>
-            <th className="border border-border px-2 py-1 text-right">Puntos</th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map(([player, pts]) => (
-            <tr key={player} className="odd:bg-background even:bg-muted/20">
-              <td className="border border-border px-2 py-1">{player}</td>
-              <td className="border border-border px-2 py-1 text-right">{pts.toFixed(2)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    );
   };
 
   // Helper para colorear el score según la leyenda
@@ -310,6 +305,56 @@ const RondasRegistradas = () => {
                     Calcular Apuestas
                   </Button>
                 </div>
+
+                {betResults && (
+                  <section className="bg-white border border-border rounded p-4 shadow-sm">
+                    <h3 className="text-xl font-semibold mb-4">Detalle de Puntos Ganados</h3>
+
+                    <div className="mb-4">
+                      <h4 className="font-semibold mb-2">Puntos por Hoyo Ganado</h4>
+                      <ul className="list-disc list-inside max-h-48 overflow-y-auto border border-muted rounded p-2">
+                        {Object.entries(betResults.ganadoresPorHoyo).map(([hoyo, ganadores]) => (
+                          <li key={hoyo}>
+                            <strong>Hoyo {hoyo}:</strong> {ganadores.join(", ")}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="mb-4">
+                      <h4 className="font-semibold mb-2">Ganadores por Desempeño Global</h4>
+                      <ul className="list-disc list-inside">
+                        <li>
+                          <strong>Score Bruto Total:</strong> {betResults.ganadoresDesempeno.brutoTotal.join(", ")}
+                        </li>
+                        <li>
+                          <strong>Score Neto Primeros 9 Hoyos:</strong> {betResults.ganadoresDesempeno.netoPrimeros9.join(", ")}
+                        </li>
+                        <li>
+                          <strong>Score Neto Segundos 9 Hoyos:</strong> {betResults.ganadoresDesempeno.netoSegundos9.join(", ")}
+                        </li>
+                        <li>
+                          <strong>Score Neto Total 18 Hoyos:</strong> {betResults.ganadoresDesempeno.netoTotal.join(", ")}
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold mb-2">Puntos por Birdies</h4>
+                      {Object.keys(betResults.puntosBirdies).length === 0 ? (
+                        <p>No hay puntos por birdies.</p>
+                      ) : (
+                        <ul className="list-disc list-inside">
+                          {Object.entries(betResults.puntosBirdies).map(([player, puntos]) => (
+                            <li key={player}>
+                              {player}: {puntos.toFixed(2)}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </section>
+                )}
 
                 <div className="grid grid-cols-1 gap-6">
                   {round.players.map((player) => {
