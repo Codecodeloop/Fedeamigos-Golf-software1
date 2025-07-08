@@ -168,7 +168,7 @@ const RondasRegistradas = () => {
 
   const [selectedRoundId, setSelectedRoundId] = useState<number | null>(null);
   const [betResultsByRound, setBetResultsByRound] = useState<Record<number, BetResults | null>>({});
-  const [baseValue, setBaseValue] = useState<number>(0);
+  const [baseValueInput, setBaseValueInput] = useState<string>("");
 
   const calcularApuestas = (roundId: number) => {
     const round = rounds.find((r) => r.id === roundId);
@@ -176,7 +176,8 @@ const RondasRegistradas = () => {
       alert("Ronda no encontrada");
       return;
     }
-    if (baseValue <= 0) {
+    const baseValue = parseFloat(baseValueInput);
+    if (isNaN(baseValue) || baseValue <= 0) {
       alert("Por favor ingresa un valor base válido mayor a 0.");
       return;
     }
@@ -364,8 +365,8 @@ const RondasRegistradas = () => {
             type="number"
             min={0}
             step={0.01}
-            value={baseValue}
-            onChange={(e) => setBaseValue(parseFloat(e.target.value) || 0)}
+            value={baseValueInput}
+            onChange={(e) => setBaseValueInput(e.target.value)}
             className="border border-border rounded px-3 py-1 w-32"
             placeholder="Ej: 10000"
           />
@@ -387,7 +388,8 @@ const RondasRegistradas = () => {
             const betResults = betResultsByRound[round.id] ?? null;
 
             const allPlayerNames = round.players.map((p) => p.name);
-            const puntosTotales = betResults ? calcularPuntosTotales(betResults, allPlayerNames) : {};
+            const baseValue = parseFloat(baseValueInput);
+            const puntosTotales = betResults && !isNaN(baseValue) ? calcularPuntosTotales(betResults, allPlayerNames) : {};
 
             return (
               <div className="space-y-8">
@@ -460,7 +462,7 @@ const RondasRegistradas = () => {
                         <ul className="list-disc list-inside">
                           {allPlayerNames.map((player) => {
                             const puntos = puntosTotales[player] ?? 0;
-                            const dinero = puntos * baseValue;
+                            const dinero = !isNaN(baseValue) ? puntos * baseValue : 0;
                             return (
                               <li key={player}>
                                 {player}: {puntos.toFixed(2)} puntos - ${dinero.toFixed(2)}
