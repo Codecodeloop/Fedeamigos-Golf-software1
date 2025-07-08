@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Button } from "../components/ui/button";
 import { useRondas } from "../context/RondasContext";
-import { useNavigate } from "react-router-dom"; // Added import
+import { useNavigate } from "react-router-dom";
 
 // Handicap difficulty per hole (1 = hardest, 18 = easiest)
 const holeHandicaps = [
@@ -27,29 +27,25 @@ const sumScores = (scores: (number | null)[], start: number, end: number) => {
     .reduce((acc, val) => acc + (val ?? 0), 0);
 };
 
-// Calculate net score per hole based on 75% of player handicap and hole handicaps
+// Calculate net score per hole based on rounded 75% handicap (integer) and hole handicaps
 const calculateNetScores = (scores: (number | null)[], playerHandicap: number | null) => {
   if (playerHandicap === null || playerHandicap <= 0) {
     // No handicap, net score = gross score
     return scores.map((score) => (score !== null ? score : null));
   }
 
-  const handicap75 = playerHandicap * 0.75;
-
-  // Number of full strokes to subtract per hole
-  const fullStrokes = Math.floor(handicap75);
-  // Number of holes to subtract an extra stroke (for fractional handicap)
-  const extraStrokes = Math.round((handicap75 - fullStrokes) * 18);
+  // Calculate handicap al 75% and round according to rule
+  const rawHandicap75 = playerHandicap * 0.75;
+  const decimalPart = rawHandicap75 - Math.floor(rawHandicap75);
+  const handicap75 =
+    decimalPart <= 0.5 ? Math.floor(rawHandicap75) : Math.ceil(rawHandicap75);
 
   return scores.map((score, index) => {
     if (score === null) return null;
     const holeHandicap = holeHandicaps[index];
     let strokesToSubtract = 0;
-    if (holeHandicap <= fullStrokes) {
+    if (holeHandicap <= handicap75) {
       strokesToSubtract = 1;
-    }
-    if (extraStrokes > 0 && holeHandicap > 18 - extraStrokes) {
-      strokesToSubtract += 1;
     }
     const netScore = score - strokesToSubtract;
     return netScore > 0 ? netScore : 0;
@@ -307,7 +303,13 @@ const RondasRegistradas = () => {
                     <p>
                       <strong>Handicap al 75%:</strong>{" "}
                       {round.players[0].handicap !== null
-                        ? (round.players[0].handicap * 0.75).toFixed(1)
+                        ? (() => {
+                            const rawHandicap75 = round.players[0].handicap * 0.75;
+                            const decimalPart = rawHandicap75 - Math.floor(rawHandicap75);
+                            const handicap75 =
+                              decimalPart <= 0.5 ? Math.floor(rawHandicap75) : Math.ceil(rawHandicap75);
+                            return handicap75.toString();
+                          })()
                         : "-"}
                     </p>
                   </div>
