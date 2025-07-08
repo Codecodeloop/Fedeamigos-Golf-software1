@@ -19,21 +19,21 @@ const Index = () => {
       <div className="flex flex-col space-y-6 w-full max-w-xs">
         <Button
           variant="outline"
-          className="text-lg font-serif"
+          className="text-xl font-serif py-4 px-6"
           onClick={() => navigate("/")}
         >
           Reglas del Juego y Apuestas - Grupo de Golf
         </Button>
         <Button
           variant="outline"
-          className="text-lg font-serif"
+          className="text-xl font-serif py-4 px-6"
           onClick={() => navigate("/registro-ronda")}
         >
           Registro de Ronda de Golf
         </Button>
         <Button
           variant="outline"
-          className="text-lg font-serif"
+          className="text-xl font-serif py-4 px-6"
           onClick={() => navigate("/rondas-registradas")}
         >
           Ver Rondas de Golf Registradas
