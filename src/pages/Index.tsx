@@ -24,7 +24,7 @@ const Index = () => {
           className="text-xl font-serif py-4 px-6"
           onClick={() => navigate("/")}
         >
-          Reglas del Juego y Apuestas - Grupo de Golf
+          Reglas del Juego y Apuestas
         </Button>
         <Button
           variant="outline"
