@@ -66,6 +66,12 @@ const RondasRegistradas = () => {
     });
   };
 
+  // Stub function for calculating bets for a round
+  const calcularApuestas = (roundId: number) => {
+    alert(`Calcular apuestas para la ronda con ID: ${roundId}`);
+    // Aquí se implementará la lógica real de cálculo de apuestas
+  };
+
   return (
     <div className="min-h-screen p-6 bg-[#f9f7f1] text-[#1a1a1a] font-serif max-w-6xl mx-auto">
       <header className="mb-6">
@@ -79,9 +85,14 @@ const RondasRegistradas = () => {
         <div className="space-y-10">
           {rounds.map((round) => (
             <div key={round.id}>
-              <h3 className="font-semibold mb-6 text-xl border-b border-border pb-2">
-                Fecha: {round.date}
-              </h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-xl border-b border-border pb-2">
+                  Fecha: {round.date}
+                </h3>
+                <Button size="sm" onClick={() => calcularApuestas(round.id)}>
+                  Calcular Apuestas
+                </Button>
+              </div>
               <div className="space-y-8">
                 {round.players.map((player) => {
                   const outScore = sumScores(player.scores, 0, 9);
