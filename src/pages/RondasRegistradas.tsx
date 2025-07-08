@@ -1,11 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { useRondas } from "../context/RondasContext";
 import { useNavigate } from "react-router-dom";
@@ -220,7 +215,6 @@ const RondasRegistradas = () => {
       }
     });
 
-    // Guardar resultados en estado para mostrar en UI
     setBetResultsByRound((prev) => ({
       ...prev,
       [roundId]: {
@@ -260,6 +254,20 @@ const RondasRegistradas = () => {
     );
   };
 
+  // Helper para colorear el score según la leyenda
+  const getScoreColor = (score: number | null, par: number) => {
+    if (score === null) return "bg-gray-100 text-gray-400";
+
+    const diff = score - par;
+
+    if (diff <= -2) return "bg-blue-900 text-white"; // Eagle
+    if (diff === -1) return "bg-red-600 text-white"; // Birdie
+    if (diff === 0) return "bg-white text-black"; // Par
+    if (diff === 1) return "bg-green-700 text-white"; // Bogey
+    if (diff === 2) return "bg-yellow-800 text-white"; // Double Bogey (usé amarillo oscuro)
+    return "bg-blue-400 text-white"; // Other
+  };
+
   return (
     <div className="min-h-screen p-6 bg-[#f9f7f1] text-[#1a1a1a] font-serif max-w-6xl mx-auto">
       <header className="mb-6">
@@ -275,8 +283,8 @@ const RondasRegistradas = () => {
             const betResults = betResultsByRound[round.id] ?? null;
 
             return (
-              <div key={round.id}>
-                <div className="flex items-center justify-between mb-2">
+              <div key={round.id} className="border border-border rounded p-4 bg-white shadow-sm">
+                <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-xl border-b border-border pb-2">
                     Fecha: {round.date}
                   </h3>
@@ -286,7 +294,7 @@ const RondasRegistradas = () => {
                 </div>
 
                 {betResults && (
-                  <div className="mb-6 p-4 border border-border rounded bg-white shadow-sm">
+                  <div className="mb-6">
                     <h4 className="font-semibold mb-3 text-lg">Resultados de Apuestas</h4>
 
                     <h5 className="font-semibold mt-2 mb-1">Puntos por Hoyo Ganado (18 puntos)</h5>
@@ -310,140 +318,121 @@ const RondasRegistradas = () => {
                   </div>
                 )}
 
-                <div className="space-y-8">
-                  {round.players.map((player) => {
-                    const outScore = sumScores(player.scores, 0, 9);
-                    const inScore = sumScores(player.scores, 9, 18);
-                    const totalScore = outScore + inScore;
+                <div>
+                  {/* Tabla de scores con formato y colores */}
+                  <table className="w-full border border-border text-center text-sm">
+                    <thead>
+                      <tr className="bg-muted border-b border-border">
+                        <th className="border border-border px-2 py-1">Hoyo</th>
+                        {holeNumbers.slice(0, 9).map((num) => (
+                          <th key={num} className="border border-border px-2 py-1">{num}</th>
+                        ))}
+                        <th className="border border-border px-2 py-1 font-bold">OUT</th>
+                      </tr>
+                      <tr className="bg-muted border-b border-border">
+                        <th className="border border-border px-2 py-1">Distancia</th>
+                        {[360, 198, 402, 485, 469, 217, 352, 600, 405].map((dist, i) => (
+                          <th key={i} className="border border-border px-2 py-1 font-mono">{dist}</th>
+                        ))}
+                        <th className="border border-border px-2 py-1 font-bold">3486</th>
+                      </tr>
+                      <tr className="bg-muted border-b border-border">
+                        <th className="border border-border px-2 py-1">Par</th>
+                        {holePars.slice(0, 9).map((par, i) => (
+                          <th key={i} className="border border-border px-2 py-1 font-mono">{par}</th>
+                        ))}
+                        <th className="border border-border px-2 py-1 font-bold">{holePars.slice(0, 9).reduce((a, b) => a + b, 0)}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-border px-2 py-1 font-semibold text-left">Score</td>
+                        {round.players[0]?.scores.slice(0, 9).map((score, i) => {
+                          const par = holePars[i];
+                          const colorClass = getScoreColor(score, par);
+                          return (
+                            <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
+                              {score !== null ? score : "-"}
+                            </td>
+                          );
+                        })}
+                        <td className="border border-border px-2 py-1 font-mono font-bold">
+                          {sumScores(round.players[0]?.scores ?? [], 0, 9)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                    const netScores = calculateNetScores(player.scores, player.handicap);
-                    const outNet = sumScores(netScores, 0, 9);
-                    const inNet = sumScores(netScores, 9, 18);
-                    const totalNet = outNet + inNet;
+                  <table className="w-full border border-border text-center text-sm mt-2">
+                    <thead>
+                      <tr className="bg-muted border-b border-border">
+                        <th className="border border-border px-2 py-1">Hoyo</th>
+                        {holeNumbers.slice(9, 18).map((num) => (
+                          <th key={num} className="border border-border px-2 py-1">{num}</th>
+                        ))}
+                        <th className="border border-border px-2 py-1 font-bold">IN</th>
+                      </tr>
+                      <tr className="bg-muted border-b border-border">
+                        <th className="border border-border px-2 py-1">Distancia</th>
+                        {[458, 162, 419, 463, 585, 334, 465, 207, 570].map((dist, i) => (
+                          <th key={i} className="border border-border px-2 py-1 font-mono">{dist}</th>
+                        ))}
+                        <th className="border border-border px-2 py-1 font-bold">3663</th>
+                      </tr>
+                      <tr className="bg-muted border-b border-border">
+                        <th className="border border-border px-2 py-1">Par</th>
+                        {holePars.slice(9, 18).map((par, i) => (
+                          <th key={i} className="border border-border px-2 py-1 font-mono">{par}</th>
+                        ))}
+                        <th className="border border-border px-2 py-1 font-bold">{holePars.slice(9, 18).reduce((a, b) => a + b, 0)}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-border px-2 py-1 font-semibold text-left">Score</td>
+                        {round.players[0]?.scores.slice(9, 18).map((score, i) => {
+                          const par = holePars[i + 9];
+                          const colorClass = getScoreColor(score, par);
+                          return (
+                            <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
+                              {score !== null ? score : "-"}
+                            </td>
+                          );
+                        })}
+                        <td className="border border-border px-2 py-1 font-mono font-bold">
+                          {sumScores(round.players[0]?.scores ?? [], 9, 18)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                    const handicap75 = player.handicap !== null ? Math.round(player.handicap * 0.75) : null;
-
-                    return (
-                      <div key={player.name} className="p-4 border-b border-border last:border-none">
-                        <div className="flex justify-between items-center mb-4">
-                          <h4 className="font-semibold text-lg">{player.name}</h4>
-                          <span className="text-sm flex items-center gap-2">
-                            Handicap: {player.handicap ?? "-"}
-                            {handicap75 !== null && (
-                              <span className="text-red-600 text-xs font-mono">
-                                ({handicap75})
-                              </span>
-                            )}
-                          </span>
-                        </div>
-
-                        <table className="w-full table-fixed border border-border text-center text-sm">
-                          <thead>
-                            <tr className="bg-muted border-b border-border">
-                              <th className="border border-border px-3 py-1 text-left w-16">HOLES</th>
-                              {holeNumbers.slice(0, 9).map((num) => (
-                                <th key={num} className="border border-border px-2 py-1">
-                                  {num}
-                                </th>
-                              ))}
-                              <th className="border border-border px-2 py-1 font-bold">OUT</th>
-                              {holeNumbers.slice(9, 18).map((num) => (
-                                <th key={num} className="border border-border px-2 py-1">
-                                  {num}
-                                </th>
-                              ))}
-                              <th className="border border-border px-2 py-1 font-bold">IN</th>
-                              <th className="border border-border px-2 py-1">TOTAL</th>
-                            </tr>
-                            <tr className="bg-muted border-b border-border">
-                              <th className="border border-border px-3 py-1 text-left w-16 font-semibold">PAR</th>
-                              {holePars.slice(0, 9).map((par, i) => (
-                                <th key={i} className="border border-border px-2 py-1 font-mono">
-                                  {par}
-                                </th>
-                              ))}
-                              <th className="border border-border px-2 py-1 font-bold">
-                                {holePars.slice(0, 9).reduce((a, b) => a + b, 0)}
-                              </th>
-                              {holePars.slice(9, 18).map((par, i) => (
-                                <th key={i + 9} className="border border-border px-2 py-1 font-mono">
-                                  {par}
-                                </th>
-                              ))}
-                              <th className="border border-border px-2 py-1 font-bold">
-                                {holePars.slice(9, 18).reduce((a, b) => a + b, 0)}
-                              </th>
-                              <th className="border border-border px-2 py-1 font-mono">
-                                {holePars.reduce((a, b) => a + b, 0)}
-                              </th>
-                            </tr>
-                            <tr className="bg-muted border-b border-border">
-                              <th className="border border-border px-1 py-1 text-left w-16 font-semibold text-purple-700 text-xs leading-tight">VENTAJAS</th>
-                              {holeHandicaps.slice(0, 9).map((handicap, i) => (
-                                <th key={i} className="border border-border px-2 py-1 font-mono text-purple-700">
-                                  {handicap}
-                                </th>
-                              ))}
-                              <th className="border border-border px-2 py-1"></th>
-                              {holeHandicaps.slice(9, 18).map((handicap, i) => (
-                                <th key={i + 9} className="border border-border px-2 py-1 font-mono text-purple-700">
-                                  {handicap}
-                                </th>
-                              ))}
-                              <th className="border border-border px-2 py-1"></th>
-                              <th className="border border-border px-2 py-1"></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td className="border border-border px-3 py-1 font-semibold text-left w-16">SCORE</td>
-                              {player.scores.slice(0, 9).map((score, i) => (
-                                <td key={i} className="border border-border px-2 py-1 font-mono">
-                                  {score !== null ? score : "-"}
-                                </td>
-                              ))}
-                              <td className="border border-border px-2 py-1 font-mono font-bold">
-                                {outScore > 0 ? outScore : "-"}
-                              </td>
-                              {player.scores.slice(9, 18).map((score, i) => (
-                                <td key={i + 9} className="border border-border px-2 py-1 font-mono">
-                                  {score !== null ? score : "-"}
-                                </td>
-                              ))}
-                              <td className="border border-border px-2 py-1 font-mono font-bold">
-                                {inScore > 0 ? inScore : "-"}
-                              </td>
-                              <td className="border border-border px-2 py-1 font-mono">
-                                {totalScore > 0 ? totalScore : "-"}
-                              </td>
-                            </tr>
-                            <tr>
-                              <td className="border border-border px-3 py-1 font-semibold text-left w-16">NETO</td>
-                              {netScores.slice(0, 9).map((score, i) => (
-                                <td key={i} className="border border-border px-2 py-1 font-mono text-green-300">
-                                  {score !== null ? score : "-"}
-                                </td>
-                              ))}
-                              <td className="border border-border px-2 py-1 font-mono font-bold text-green-300">
-                                {outNet > 0 ? outNet : "-"}
-                              </td>
-                              {netScores.slice(9, 18).map((score, i) => (
-                                <td key={i + 9} className="border border-border px-2 py-1 font-mono text-green-300">
-                                  {score !== null ? score : "-"}
-                                </td>
-                              ))}
-                              <td className="border border-border px-2 py-1 font-mono font-bold text-green-300">
-                                {inNet > 0 ? inNet : "-"}
-                              </td>
-                              <td className="border border-border px-2 py-1 font-mono text-green-300">
-                                {totalNet > 0 ? totalNet : "-"}
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    );
-                  })}
+                  {/* Leyenda */}
+                  <div className="mt-4 flex flex-wrap gap-4 text-sm">
+                    <div className="flex items-center gap-1">
+                      <div className="w-5 h-5 bg-blue-900 border border-black"></div>
+                      <span>Eagle</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-5 h-5 bg-red-600 border border-black"></div>
+                      <span>Birdie</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-5 h-5 bg-white border border-black"></div>
+                      <span>Par</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-5 h-5 bg-green-700 border border-black"></div>
+                      <span>Bogey</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-5 h-5 bg-yellow-800 border border-black"></div>
+                      <span>Double Bogey</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-5 h-5 bg-blue-400 border border-black"></div>
+                      <span>Other</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             );
