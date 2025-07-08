@@ -295,6 +295,24 @@ const RondasRegistradas = () => {
                   </Button>
                 </div>
 
+                {round.players[0] && (
+                  <div className="mb-4 text-left space-y-1">
+                    <p>
+                      <strong>Jugador:</strong> {round.players[0].name}
+                    </p>
+                    <p>
+                      <strong>Handicap:</strong>{" "}
+                      {round.players[0].handicap !== null ? round.players[0].handicap.toFixed(1) : "-"}
+                    </p>
+                    <p>
+                      <strong>Handicap al 75%:</strong>{" "}
+                      {round.players[0].handicap !== null
+                        ? (round.players[0].handicap * 0.75).toFixed(1)
+                        : "-"}
+                    </p>
+                  </div>
+                )}
+
                 {betResults && (
                   <div className="mb-6">
                     <h4 className="font-semibold mb-3 text-lg">Resultados de Apuestas</h4>
