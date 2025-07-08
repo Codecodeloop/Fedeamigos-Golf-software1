@@ -319,7 +319,7 @@ const RondasRegistradas = () => {
                 )}
 
                 <div>
-                  {/* Tabla de scores con formato y colores */}
+                  {/* Tabla de scores con formato y colores, manteniendo estructura original */}
                   <table className="w-full border border-border text-center text-sm">
                     <thead>
                       <tr className="bg-muted border-b border-border">
