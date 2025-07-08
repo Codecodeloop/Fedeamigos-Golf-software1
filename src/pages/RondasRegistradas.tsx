@@ -27,17 +27,19 @@ const sumScores = (scores: (number | null)[], start: number, end: number) => {
     .reduce((acc, val) => acc + (val ?? 0), 0);
 };
 
-// Calculate net score per hole based on player handicap and hole handicaps
+// Calculate net score per hole based on 75% of player handicap and hole handicaps
 const calculateNetScores = (scores: (number | null)[], playerHandicap: number | null) => {
   if (playerHandicap === null || playerHandicap <= 0) {
     // No handicap, net score = gross score
     return scores.map((score) => (score !== null ? score : null));
   }
 
+  const handicap75 = playerHandicap * 0.75;
+
   // Number of full strokes to subtract per hole
-  const fullStrokes = Math.floor(playerHandicap);
+  const fullStrokes = Math.floor(handicap75);
   // Number of holes to subtract an extra stroke (for fractional handicap)
-  const extraStrokes = Math.round((playerHandicap - fullStrokes) * 18);
+  const extraStrokes = Math.round((handicap75 - fullStrokes) * 18);
 
   return scores.map((score, index) => {
     if (score === null) return null;
@@ -364,6 +366,24 @@ const RondasRegistradas = () => {
                         })}
                         <td className="border border-border px-2 py-1 font-mono font-bold">
                           {sumScores(round.players[0]?.scores ?? [], 0, 18)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border border-border px-2 py-1 font-semibold text-left">Score Neto</td>
+                        {round.players[0] ? (() => {
+                          const netScores = calculateNetScores(round.players[0].scores, round.players[0].handicap);
+                          return netScores.map((score, i) => {
+                            const par = holePars[i];
+                            const colorClass = getScoreColor(score, par);
+                            return (
+                              <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
+                                {score !== null ? score : "-"}
+                              </td>
+                            );
+                          });
+                        })() : null}
+                        <td className="border border-border px-2 py-1 font-mono font-bold">
+                          {round.players[0] ? sumScores(calculateNetScores(round.players[0].scores, round.players[0].handicap), 0, 18) : 0}
                         </td>
                       </tr>
                     </tbody>
