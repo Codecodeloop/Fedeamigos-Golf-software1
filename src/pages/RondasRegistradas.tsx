@@ -168,11 +168,16 @@ const RondasRegistradas = () => {
 
   const [selectedRoundId, setSelectedRoundId] = useState<number | null>(null);
   const [betResultsByRound, setBetResultsByRound] = useState<Record<number, BetResults | null>>({});
+  const [baseValue, setBaseValue] = useState<number>(0);
 
   const calcularApuestas = (roundId: number) => {
     const round = rounds.find((r) => r.id === roundId);
     if (!round) {
       alert("Ronda no encontrada");
+      return;
+    }
+    if (baseValue <= 0) {
+      alert("Por favor ingresa un valor base válido mayor a 0.");
       return;
     }
 
@@ -349,6 +354,27 @@ const RondasRegistradas = () => {
         </div>
       </header>
 
+      {selectedRoundId !== null && (
+        <div className="mb-6 flex items-center gap-4">
+          <label htmlFor="baseValue" className="font-semibold">
+            Valor base por jugador:
+          </label>
+          <input
+            id="baseValue"
+            type="number"
+            min={0}
+            step={0.01}
+            value={baseValue}
+            onChange={(e) => setBaseValue(parseFloat(e.target.value) || 0)}
+            className="border border-border rounded px-3 py-1 w-32"
+            placeholder="Ej: 10000"
+          />
+          <Button onClick={() => selectedRoundId !== null && calcularApuestas(selectedRoundId)}>
+            Calcular Apuestas
+          </Button>
+        </div>
+      )}
+
       {selectedRoundId === null ? (
         <p className="text-center text-muted-foreground">Por favor, selecciona una ronda para visualizar.</p>
       ) : (
@@ -367,9 +393,6 @@ const RondasRegistradas = () => {
               <div className="space-y-8">
                 <div className="flex justify-between items-center">
                   <h2 className="text-2xl font-semibold">Ronda del día: {round.date}</h2>
-                  <Button size="sm" onClick={() => calcularApuestas(round.id)}>
-                    Calcular Apuestas
-                  </Button>
                 </div>
 
                 {betResults && (
@@ -430,16 +453,20 @@ const RondasRegistradas = () => {
                     </div>
 
                     <div className="mt-6 border-t border-border pt-4">
-                      <h4 className="font-semibold mb-2">Resumen Total de Puntos por Jugador</h4>
+                      <h4 className="font-semibold mb-2">Resumen Total de Puntos y Dinero por Jugador</h4>
                       {allPlayerNames.length === 0 ? (
                         <p>No hay jugadores registrados.</p>
                       ) : (
                         <ul className="list-disc list-inside">
-                          {allPlayerNames.map((player) => (
-                            <li key={player}>
-                              {player}: {puntosTotales[player]?.toFixed(2) ?? "0.00"} puntos
-                            </li>
-                          ))}
+                          {allPlayerNames.map((player) => {
+                            const puntos = puntosTotales[player] ?? 0;
+                            const dinero = puntos * baseValue;
+                            return (
+                              <li key={player}>
+                                {player}: {puntos.toFixed(2)} puntos - ${dinero.toFixed(2)}
+                              </li>
+                            );
+                          })}
                         </ul>
                       )}
                     </div>
