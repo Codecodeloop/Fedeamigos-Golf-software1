@@ -311,7 +311,7 @@ const RondasRegistradas = () => {
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                   {round.players.map((player) => {
                     const netScores = calculateNetScores(player.scores, player.handicap);
                     const handicap75 = (() => {
