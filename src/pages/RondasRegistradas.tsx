@@ -122,6 +122,8 @@ const RondasRegistradas = () => {
 
   // Stub function for calculating bets for a round
   const calcularApuestas = (roundId: number) => {
+    console.log("Botón Calcular Apuestas clickeado para ronda ID:", roundId);
+
     const round = rounds.find((r) => r.id === roundId);
     if (!round) {
       console.warn("Ronda no encontrada");
