@@ -138,8 +138,8 @@ const RegistroRonda = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#1B4D3E] p-6">
-      <Card className="bg-[#2E7D32] border-green-700 text-green-100">
+    <div className="min-h-screen p-6">
+      <Card>
         <CardHeader>
           <CardTitle>Registro de Ronda de Golf</CardTitle>
           <CardDescription>
@@ -150,14 +150,13 @@ const RegistroRonda = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex justify-between items-center">
               <div className="flex-1">
-                <Label htmlFor="date" className="text-green-200">Fecha de la ronda</Label>
+                <Label htmlFor="date">Fecha de la ronda</Label>
                 <Input
                   id="date"
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   required
-                  className="bg-green-900 text-green-100 border-green-600"
                 />
               </div>
               <div className="ml-4 mt-6 space-x-2">
@@ -170,21 +169,20 @@ const RegistroRonda = () => {
               </div>
             </div>
 
-            <div className="border rounded p-4 border-green-600 bg-green-800">
-              <h3 className="font-semibold mb-2 text-green-100">Agregar jugador</h3>
+            <div className="border rounded p-4">
+              <h3 className="font-semibold mb-2">Agregar jugador</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                 <div>
-                  <Label htmlFor="playerName" className="text-green-200">Nombre del jugador</Label>
+                  <Label htmlFor="playerName">Nombre del jugador</Label>
                   <Input
                     id="playerName"
                     value={playerName}
                     onChange={(e) => setPlayerName(e.target.value)}
                     placeholder="Nombre completo"
-                    className="bg-green-900 text-green-100 border-green-600"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="playerHandicap" className="text-green-200">Handicap</Label>
+                  <Label htmlFor="playerHandicap">Handicap</Label>
                   <Input
                     id="playerHandicap"
                     type="number"
@@ -193,7 +191,6 @@ const RegistroRonda = () => {
                     value={playerHandicap}
                     onChange={(e) => setPlayerHandicap(e.target.value)}
                     placeholder="Ej: 12.5"
-                    className="bg-green-900 text-green-100 border-green-600"
                   />
                 </div>
                 <div>
@@ -206,41 +203,41 @@ const RegistroRonda = () => {
 
             {players.length > 0 && (
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-green-700 text-green-100 text-sm">
+                <table className="w-full border-collapse border border-border text-sm">
                   <thead>
-                    <tr className="bg-green-700">
-                      <th className="border border-green-600 p-2 text-left">Jugador</th>
-                      <th className="border border-green-600 p-2 text-left">Handicap</th>
+                    <tr className="bg-muted">
+                      <th className="border border-border p-2 text-left">Jugador</th>
+                      <th className="border border-border p-2 text-left">Handicap</th>
                       {holeHandicaps.map((handicap, i) => (
-                        <th key={i} className="border border-green-600 p-2 text-center">
+                        <th key={i} className="border border-border p-2 text-center">
                           <div className="flex flex-col items-center">
                             <span className="font-semibold">{i + 1}</span>
-                            <span className="text-xs text-green-300">
+                            <span className="text-xs text-muted-foreground">
                               {handicap}
                             </span>
                           </div>
                         </th>
                       ))}
-                      <th className="border border-green-600 p-2 text-center">Acciones</th>
+                      <th className="border border-border p-2 text-center">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {players.map((player, pIndex) => {
                       const handicap75 = player.handicap !== null ? Math.round(player.handicap * 0.75) : null;
                       return (
-                        <tr key={player.name} className="odd:bg-green-900 even:bg-green-800">
-                          <td className="border border-green-600 p-2 text-green-100">
+                        <tr key={player.name} className="odd:bg-background even:bg-muted/20">
+                          <td className="border border-border p-2">
                             {editingIndex === pIndex ? (
                               <Input
                                 value={editName}
                                 onChange={(e) => setEditName(e.target.value)}
-                                className="w-full bg-green-700 text-green-100 border-green-600"
+                                className="w-full"
                               />
                             ) : (
                               player.name
                             )}
                           </td>
-                          <td className="border border-green-600 p-2 text-green-100">
+                          <td className="border border-border p-2">
                             {editingIndex === pIndex ? (
                               <Input
                                 type="number"
@@ -248,13 +245,13 @@ const RegistroRonda = () => {
                                 step={0.1}
                                 value={editHandicap}
                                 onChange={(e) => setEditHandicap(e.target.value)}
-                                className="w-full bg-green-700 text-green-100 border-green-600"
+                                className="w-full"
                               />
                             ) : (
                               <div className="flex flex-col items-start">
                                 <span>{player.handicap ?? "-"}</span>
                                 {handicap75 !== null && (
-                                  <span className="text-red-400 text-xs font-mono">
+                                  <span className="text-red-600 text-xs font-mono">
                                     {handicap75}
                                   </span>
                                 )}
@@ -262,7 +259,7 @@ const RegistroRonda = () => {
                             )}
                           </td>
                           {player.scores.map((score, hIndex) => (
-                            <td key={hIndex} className="border border-green-600 p-1 text-green-100">
+                            <td key={hIndex} className="border border-border p-1">
                               <Input
                                 type="number"
                                 min={0}
@@ -270,12 +267,12 @@ const RegistroRonda = () => {
                                 onChange={(e) =>
                                   updateScore(pIndex, hIndex, e.target.value)
                                 }
-                                className="w-12 text-center p-1 bg-green-700 text-green-100 border-green-600"
+                                className="w-12 text-center p-1"
                                 placeholder="-"
                               />
                             </td>
                           ))}
-                          <td className="border border-green-600 p-2 text-center space-x-1">
+                          <td className="border border-border p-2 text-center space-x-1">
                             {editingIndex === pIndex ? (
                               <>
                                 <Button size="sm" variant="outline" onClick={saveEditing}>
@@ -293,7 +290,7 @@ const RegistroRonda = () => {
                                 <button
                                   type="button"
                                   onClick={() => removePlayer(player.name)}
-                                  className="text-red-400 hover:text-red-600 font-bold ml-2"
+                                  className="text-red-600 hover:text-red-800 font-bold ml-2"
                                   aria-label={`Eliminar jugador ${player.name}`}
                                 >
                                   &times;
