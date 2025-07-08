@@ -10,7 +10,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#f9f7f1] px-4 text-center">
       <h1 className="text-6xl font-serif font-semibold leading-tight text-[#1a1a1a] mb-4 tracking-wide">
-        FEDE AMIGOS
+        Fede amigos - Golf software
       </h1>
       <p className="text-xl italic text-[#4a4a4a] mb-12 max-w-md">
         Federacion de golf
