@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -13,6 +13,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useRondas, Player, Round } from "../context/RondasContext";
+import { supabase } from "../integrations/supabase/client";
 
 const holeHandicaps = [
   5, 17, 15, 1, 13, 7, 9, 3, 1,
@@ -28,8 +29,38 @@ const RegistroRonda = () => {
   const [editName, setEditName] = useState("");
   const [editHandicap, setEditHandicap] = useState("");
 
+  const [registeredPlayers, setRegisteredPlayers] = useState<string[]>([]);
+  const [loadingPlayers, setLoadingPlayers] = useState(false);
+
   const { addRound } = useRondas();
   const navigate = useNavigate();
+
+  // Load unique player names from DB on mount
+  useEffect(() => {
+    const fetchPlayers = async () => {
+      setLoadingPlayers(true);
+      const { data, error } = await supabase
+        .from("players")
+        .select("name")
+        .neq("name", null)
+        .order("name", { ascending: true });
+
+      if (error) {
+        console.error("Error loading players:", error);
+        setLoadingPlayers(false);
+        return;
+      }
+
+      if (data) {
+        // Extract unique names
+        const uniqueNames = Array.from(new Set(data.map((p) => p.name))).sort();
+        setRegisteredPlayers(uniqueNames);
+      }
+      setLoadingPlayers(false);
+    };
+
+    fetchPlayers();
+  }, []);
 
   const addPlayer = () => {
     const trimmedName = playerName.trim();
@@ -172,12 +203,23 @@ const RegistroRonda = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
               <div>
                 <Label htmlFor="playerName">Nombre del jugador</Label>
-                <Input
-                  id="playerName"
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="Nombre completo"
-                />
+                {loadingPlayers ? (
+                  <p className="text-sm text-muted-foreground">Cargando jugadores...</p>
+                ) : (
+                  <select
+                    id="playerName"
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                    className="w-full border border-border rounded px-3 py-2"
+                  >
+                    <option value="">-- Selecciona un jugador --</option>
+                    {registeredPlayers.map((name) => (
+                      <option key={name} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
               <div>
                 <Label htmlFor="playerHandicap">Handicap</Label>
