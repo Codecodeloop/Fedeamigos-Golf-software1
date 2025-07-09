@@ -28,10 +28,8 @@ const PlayerNameComboBox = React.forwardRef<HTMLInputElement, PlayerNameComboBox
       option.toLowerCase().includes(inputValue.toLowerCase())
     );
 
-    // Wrap onSelect to extract value from event.detail.value with safe casting
-    const handleSelect: React.EventHandler<React.SyntheticEvent<HTMLDivElement>> = (event) => {
-      const customEvent = event as unknown as CustomEvent<{ value: string }>;
-      const val = customEvent.detail.value;
+    // Handle selection from dropdown
+    const handleSelect = (val: string) => {
       onChange(val);
       setInputValue(val);
       setOpen(false);
@@ -64,12 +62,18 @@ const PlayerNameComboBox = React.forwardRef<HTMLInputElement, PlayerNameComboBox
         {open && (
           <Command
             className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-popover text-popover-foreground shadow-lg"
-            onSelect={handleSelect}
+            onSelect={(event) => {
+              const customEvent = event as unknown as CustomEvent<{ value: string }>;
+              handleSelect(customEvent.detail.value);
+            }}
           >
             <Command.Input
               className="hidden"
               value={inputValue}
-              onValueChange={onChange}
+              onValueChange={(val) => {
+                setInputValue(val);
+                onChange(val);
+              }}
             />
             <Command.List>
               {filteredOptions.length === 0 && (
