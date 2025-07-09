@@ -206,19 +206,22 @@ const RegistroRonda = () => {
                 {loadingPlayers ? (
                   <p className="text-sm text-muted-foreground">Cargando jugadores...</p>
                 ) : (
-                  <select
-                    id="playerName"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                    className="w-full border border-border rounded px-3 py-2"
-                  >
-                    <option value="">-- Selecciona un jugador --</option>
-                    {registeredPlayers.map((name) => (
-                      <option key={name} value={name}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
+                  <>
+                    <Input
+                      list="players-list"
+                      id="playerName"
+                      value={playerName}
+                      onChange={(e) => setPlayerName(e.target.value)}
+                      placeholder="Escribe o selecciona un jugador"
+                      className="w-full border border-border rounded px-3 py-2"
+                      autoComplete="off"
+                    />
+                    <datalist id="players-list">
+                      {registeredPlayers.map((name) => (
+                        <option key={name} value={name} />
+                      ))}
+                    </datalist>
+                  </>
                 )}
               </div>
               <div>
