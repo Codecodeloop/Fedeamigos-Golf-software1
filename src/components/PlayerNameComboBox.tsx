@@ -51,6 +51,7 @@ const PlayerNameComboBox = React.forwardRef<HTMLInputElement, PlayerNameComboBox
               placeholder={placeholder}
               className={cn("pr-8", className)}
               autoComplete="off"
+              spellCheck={false}
             />
             <button
               type="button"
