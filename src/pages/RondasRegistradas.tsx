@@ -187,42 +187,44 @@ const RondasRegistradas = () => {
     const ganadoresPorHoyo: Record<number, string[]> = {};
 
     for (let hoyo = 0; hoyo < 18; hoyo++) {
-      const scoresHoyo = round.players.map((player) => {
-        const netScores = calculateNetScores(player.scores, player.handicap);
-        return { name: player.name, netScore: netScores[hoyo] ?? Infinity };
-      });
-
+      // Para desempate, recorrer hoyos sucesivos hasta encontrar ganador único o agotar 18 hoyos
       let desempateHoyo = hoyo;
       let ganadores: string[] = [];
+      let intentos = 0;
 
-      while (ganadores.length === 0) {
+      while (intentos < 18) {
+        // Calcular scores netos para el hoyo de desempate actual
+        const scoresHoyo = round.players.map((player) => {
+          const netScores = calculateNetScores(player.scores, player.handicap);
+          return { name: player.name, netScore: netScores[desempateHoyo] ?? Infinity };
+        });
+
+        // Encontrar score neto mínimo
         const minNetScore = Math.min(
-          ...scoresHoyo.map((s) => s.netScore === null ? Infinity : s.netScore)
+          ...scoresHoyo.map((s) => (s.netScore === null ? Infinity : s.netScore))
         );
+
+        // Filtrar jugadores con score neto mínimo
         ganadores = scoresHoyo
           .filter((s) => s.netScore === minNetScore)
           .map((s) => s.name);
 
         if (ganadores.length === 1) {
+          // Ganador único encontrado
           break;
-        } else {
-          desempateHoyo = (desempateHoyo + 1) % 18;
-          scoresHoyo.forEach((s) => {
-            const player = round.players.find((p) => p.name === s.name);
-            if (player) {
-              const netScores = calculateNetScores(player.scores, player.handicap);
-              s.netScore = netScores[desempateHoyo] ?? Infinity;
-            }
-          });
-          ganadores = [];
         }
+
+        // Empate: pasar al siguiente hoyo
+        desempateHoyo = (desempateHoyo + 1) % 18;
+        intentos++;
       }
 
+      // Si después de 18 hoyos sigue empate, se mantiene empate
       ganadores.forEach((g) => {
         puntosPorHoyo[g] = (puntosPorHoyo[g] ?? 0) + 1;
       });
 
-      ganadoresPorHoyo[hoyo + 1] = ganadores; // Store winners for display (hoyo 1-based)
+      ganadoresPorHoyo[hoyo + 1] = ganadores; // Guardar ganadores para mostrar (hoyo 1-based)
     }
 
     // 2. Puntos por desempeño global (12 puntos)
@@ -254,7 +256,7 @@ const RondasRegistradas = () => {
     const puntosNetoSegundos9 = distributePoints(sortWithTies(netoSegundos9), 2, 1);
     const puntosNetoTotal = distributePoints(sortWithTies(netoTotal), 3, 1);
 
-    // Get winners for each category (lowest score)
+    // Ganadores por desempeño global
     const ganadoresDesempeno = {
       brutoTotal: sortWithTies(brutoTotal)[0]?.players ?? [],
       netoPrimeros9: sortWithTies(netoPrimeros9)[0]?.players ?? [],
@@ -262,7 +264,7 @@ const RondasRegistradas = () => {
       netoTotal: sortWithTies(netoTotal)[0]?.players ?? [],
     };
 
-    // Get second place players for neto categories
+    // Segundos mejores por desempeño neto
     const segundosMejoresDesempeno = {
       netoPrimeros9: getSecondPlacePlayers(sortWithTies(netoPrimeros9)),
       netoSegundos9: getSecondPlacePlayers(sortWithTies(netoSegundos9)),
@@ -300,7 +302,6 @@ const RondasRegistradas = () => {
       },
     }));
 
-    // Guardar totalBirdiesPoints para usar en renderizado
     setTotalBirdies(totalBirdiesPoints);
   };
 
