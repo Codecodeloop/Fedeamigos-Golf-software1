@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "../components/ui/button";
 import { useRondas } from "../context/RondasContext";
 import { useNavigate } from "react-router-dom";
@@ -170,6 +170,31 @@ const RondasRegistradas = () => {
   const [betResultsByRound, setBetResultsByRound] = useState<Record<number, BetResults | null>>({});
   const [baseValueInput, setBaseValueInput] = useState<string>("");
 
+  // Editable players state for the selected round
+  const [editablePlayers, setEditablePlayers] = useState<
+    { name: string; handicap: number | null; scores: (number | null)[] }[]
+  >([]);
+
+  // Update editablePlayers when selectedRoundId changes
+  useEffect(() => {
+    if (selectedRoundId === null) {
+      setEditablePlayers([]);
+      setBetResultsByRound({});
+      return;
+    }
+    const round = rounds.find((r) => r.id === selectedRoundId);
+    if (round) {
+      // Deep copy players to editable state
+      const playersCopy = round.players.map((p) => ({
+        name: p.name,
+        handicap: p.handicap,
+        scores: p.scores.map((s) => s),
+      }));
+      setEditablePlayers(playersCopy);
+      setBetResultsByRound({});
+    }
+  }, [selectedRoundId, rounds]);
+
   const calcularApuestas = (roundId: number) => {
     const round = rounds.find((r) => r.id === roundId);
     if (!round) {
@@ -182,13 +207,16 @@ const RondasRegistradas = () => {
       return;
     }
 
+    // Use editablePlayers for calculations
+    const playersToUse = editablePlayers;
+
     // 1. Puntos por hoyo ganado (18 puntos)
     const puntosPorHoyo: Record<string, number> = {};
     const ganadoresPorHoyo: Record<number, string[]> = {};
 
     for (let hoyo = 0; hoyo < 18; hoyo++) {
       // Paso 1: obtener scores netos para el hoyo original
-      const netScoresOriginalHoyo = round.players.map((player) => {
+      const netScoresOriginalHoyo = playersToUse.map((player) => {
         const netScores = calculateNetScores(player.scores, player.handicap);
         return { name: player.name, netScore: netScores[hoyo] ?? Infinity };
       });
@@ -218,7 +246,7 @@ const RondasRegistradas = () => {
 
       while (intentos < 18) {
         // Calcular scores netos para el hoyo de desempate actual solo para jugadores empatados
-        const scoresDesempate = round.players
+        const scoresDesempate = playersToUse
           .filter((p) => empatados.includes(p.name))
           .map((player) => {
             const netScores = calculateNetScores(player.scores, player.handicap);
@@ -260,24 +288,24 @@ const RondasRegistradas = () => {
     }
 
     // 2. Puntos por desempeño global (12 puntos)
-    const brutoTotal = round.players.map((player) => {
+    const brutoTotal = playersToUse.map((player) => {
       const total = sumScores(player.scores, 0, 18);
       return { name: player.name, value: total };
     });
 
-    const netoPrimeros9 = round.players.map((player) => {
+    const netoPrimeros9 = playersToUse.map((player) => {
       const netScores = calculateNetScores(player.scores, player.handicap);
       const total = sumScores(netScores, 0, 9);
       return { name: player.name, value: total };
     });
 
-    const netoSegundos9 = round.players.map((player) => {
+    const netoSegundos9 = playersToUse.map((player) => {
       const netScores = calculateNetScores(player.scores, player.handicap);
       const total = sumScores(netScores, 9, 18);
       return { name: player.name, value: total };
     });
 
-    const netoTotal = round.players.map((player) => {
+    const netoTotal = playersToUse.map((player) => {
       const netScores = calculateNetScores(player.scores, player.handicap);
       const total = sumScores(netScores, 0, 18);
       return { name: player.name, value: total };
@@ -306,7 +334,7 @@ const RondasRegistradas = () => {
     // 3. Puntos por birdies (1 punto por birdie bruto)
     const puntosBirdies: Record<string, number> = {};
     let totalBirdiesPoints = 0;
-    round.players.forEach((player) => {
+    playersToUse.forEach((player) => {
       let birdiesCount = 0;
       player.scores.forEach((score, i) => {
         if (score !== null && score === holePars[i] - 1) {
@@ -377,6 +405,47 @@ const RondasRegistradas = () => {
     return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
+  // Handle score change for editable players
+  const handleScoreChange = (playerIndex: number, holeIndex: number, value: string) => {
+    const scoreNum = parseInt(value);
+    setEditablePlayers((prev) => {
+      const newPlayers = [...prev];
+      if (!isNaN(scoreNum) && scoreNum >= 0) {
+        newPlayers[playerIndex].scores[holeIndex] = scoreNum;
+      } else {
+        newPlayers[playerIndex].scores[holeIndex] = null;
+      }
+      return newPlayers;
+    });
+  };
+
+  // Handle handicap change for editable players
+  const handleHandicapChange = (playerIndex: number, value: string) => {
+    const handicapNum = parseFloat(value);
+    setEditablePlayers((prev) => {
+      const newPlayers = [...prev];
+      if (!isNaN(handicapNum) && handicapNum >= 0) {
+        newPlayers[playerIndex].handicap = handicapNum;
+      } else {
+        newPlayers[playerIndex].handicap = null;
+      }
+      return newPlayers;
+    });
+  };
+
+  // Save changes to the selected round in local state (simulate update)
+  const saveChanges = () => {
+    if (selectedRoundId === null) return;
+    // Update rounds state locally by replacing players for the selected round
+    // (In real app, would update DB)
+    // Here just update local editablePlayers and clear bet results to force recalculation
+    setBetResultsByRound((prev) => ({
+      ...prev,
+      [selectedRoundId]: null,
+    }));
+    alert("Cambios guardados localmente. Por favor, recalcula las apuestas.");
+  };
+
   return (
     <div className="min-h-screen p-6 bg-[#f9f7f1] text-[#1a1a1a] font-serif max-w-6xl mx-auto">
       <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -402,7 +471,7 @@ const RondasRegistradas = () => {
       </header>
 
       {selectedRoundId !== null && (
-        <div className="mb-6 flex items-center gap-4">
+        <div className="mb-6 flex flex-wrap items-center gap-4">
           <label htmlFor="baseValue" className="font-semibold">
             Valor base por jugador:
           </label>
@@ -419,6 +488,9 @@ const RondasRegistradas = () => {
           <Button onClick={() => selectedRoundId !== null && calcularApuestas(selectedRoundId)}>
             Calcular Apuestas
           </Button>
+          <Button variant="secondary" onClick={saveChanges}>
+            Guardar Cambios
+          </Button>
         </div>
       )}
 
@@ -433,7 +505,7 @@ const RondasRegistradas = () => {
             }
             const betResults = betResultsByRound[round.id] ?? null;
 
-            const allPlayerNames = round.players.map((p) => p.name);
+            const allPlayerNames = editablePlayers.map((p) => p.name);
             const baseValue = parseFloat(baseValueInput);
             const puntosTotales = betResults && !isNaN(baseValue) ? calcularPuntosTotales(betResults, allPlayerNames) : {};
 
@@ -543,7 +615,7 @@ const RondasRegistradas = () => {
                 )}
 
                 <div className="grid grid-cols-1 gap-6">
-                  {round.players.map((player) => {
+                  {editablePlayers.map((player, pIndex) => {
                     const netScores = calculateNetScores(player.scores, player.handicap);
                     const handicap75 = (() => {
                       if (player.handicap === null) return "-";
@@ -566,63 +638,25 @@ const RondasRegistradas = () => {
                         className="border border-border rounded p-4 bg-white shadow-sm"
                       >
                         <h3 className="text-xl font-semibold mb-2">{player.name}</h3>
-                        <p>
-                          <strong>Handicap:</strong>{" "}
-                          {player.handicap !== null ? player.handicap.toFixed(1) : "-"}
-                        </p>
+                        <div className="mb-2 flex items-center gap-4">
+                          <label className="font-semibold" htmlFor={`handicap-${pIndex}`}>
+                            Handicap:
+                          </label>
+                          <input
+                            id={`handicap-${pIndex}`}
+                            type="number"
+                            min={0}
+                            step={0.1}
+                            value={player.handicap !== null ? player.handicap : ""}
+                            onChange={(e) => handleHandicapChange(pIndex, e.target.value)}
+                            className="border border-border rounded px-2 py-1 w-20"
+                          />
+                        </div>
                         <p>
                           <strong>Handicap al 75%:</strong> {handicap75}
                         </p>
 
-                        {betResults && (
-                          <div className="mb-4">
-                            <h4 className="font-semibold mb-2 text-lg">Resultados de Apuestas</h4>
-
-                            <h5 className="font-semibold mt-2 mb-1">Puntos por Hoyo Ganado</h5>
-                            <p>
-                              {betResults.puntosPorHoyo[player.name]
-                                ? betResults.puntosPorHoyo[player.name].toFixed(2)
-                                : "0"}
-                            </p>
-
-                            <h5 className="font-semibold mt-2 mb-1">Puntos por Desempeño Global</h5>
-                            <ul className="list-disc list-inside">
-                              <li>
-                                Score Bruto Total:{" "}
-                                {betResults.puntosBrutoTotal[player.name]
-                                  ? betResults.puntosBrutoTotal[player.name].toFixed(2)
-                                  : "0"}
-                              </li>
-                              <li>
-                                Score Neto Primeros 9 Hoyos:{" "}
-                                {betResults.puntosNetoPrimeros9[player.name]
-                                  ? betResults.puntosNetoPrimeros9[player.name].toFixed(2)
-                                  : "0"}
-                              </li>
-                              <li>
-                                Score Neto Segundos 9 Hoyos:{" "}
-                                {betResults.puntosNetoSegundos9[player.name]
-                                  ? betResults.puntosNetoSegundos9[player.name].toFixed(2)
-                                  : "0"}
-                              </li>
-                              <li>
-                                Score Neto Total 18 Hoyos:{" "}
-                                {betResults.puntosNetoTotal[player.name]
-                                  ? betResults.puntosNetoTotal[player.name].toFixed(2)
-                                  : "0"}
-                              </li>
-                            </ul>
-
-                            <h5 className="font-semibold mt-2 mb-1">Puntos por Birdies</h5>
-                            <p>
-                              {betResults.puntosBirdies[player.name]
-                                ? betResults.puntosBirdies[player.name].toFixed(2)
-                                : "0"}
-                            </p>
-                          </div>
-                        )}
-
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto mt-2">
                           <table className="w-full border border-border text-center text-sm">
                             <thead>
                               <tr className="bg-muted border-b border-border">
@@ -678,32 +712,38 @@ const RondasRegistradas = () => {
                             </thead>
                             <tbody>
                               <tr>
-                                <td className="border border-border px-2 py-1 font-semibold text-left">Score</td>
-                                {player.scores.slice(0, 9).map((score, i) => {
-                                  const par = holePars[i];
-                                  const colorClass = getScoreColor(score, par);
-                                  return (
-                                    <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
-                                      {score !== null ? score : "-"}
-                                    </td>
-                                  );
-                                })}
-                                <td className="border border-border px-2 py-1 font-mono font-bold">
+                                <td className="border border-border px-2 py-1 font-semibold text-left">Score Bruto</td>
+                                {player.scores.slice(0, 9).map((score, i) => (
+                                  <td key={i} className="border border-border px-2 py-1">
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      value={score !== null ? score : ""}
+                                      onChange={(e) => handleScoreChange(pIndex, i, e.target.value)}
+                                      className="w-12 text-center p-1 border border-border rounded"
+                                      placeholder="-"
+                                    />
+                                  </td>
+                                ))}
+                                <td className="border border-border px-2 py-1 font-bold">
                                   {outTotal}
                                 </td>
-                                {player.scores.slice(9).map((score, i) => {
-                                  const par = holePars[i + 9];
-                                  const colorClass = getScoreColor(score, par);
-                                  return (
-                                    <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
-                                      {score !== null ? score : "-"}
-                                    </td>
-                                  );
-                                })}
-                                <td className="border border-border px-2 py-1 font-mono font-bold">
+                                {player.scores.slice(9).map((score, i) => (
+                                  <td key={i} className="border border-border px-2 py-1">
+                                    <input
+                                      type="number"
+                                      min={0}
+                                      value={score !== null ? score : ""}
+                                      onChange={(e) => handleScoreChange(pIndex, i + 9, e.target.value)}
+                                      className="w-12 text-center p-1 border border-border rounded"
+                                      placeholder="-"
+                                    />
+                                  </td>
+                                ))}
+                                <td className="border border-border px-2 py-1 font-bold">
                                   {inTotal}
                                 </td>
-                                <td className="border border-border px-2 py-1 font-mono font-bold">
+                                <td className="border border-border px-2 py-1 font-bold">
                                   {sumScores(player.scores, 0, 18)}
                                 </td>
                               </tr>
