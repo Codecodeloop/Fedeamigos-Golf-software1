@@ -14,7 +14,6 @@ import { Label } from "../components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useRondas, Player, Round } from "../context/RondasContext";
 import { supabase } from "../integrations/supabase/client";
-import PlayerNameComboBox from "../components/PlayerNameComboBox";
 
 const holeHandicaps = [
   5, 17, 15, 1, 13, 7, 9, 3, 1,
@@ -84,6 +83,19 @@ const RegistroRonda = () => {
     setPlayers((prev) => [...prev, newPlayer]);
     setPlayerName("");
     setPlayerHandicap("");
+  };
+
+  const addRegisteredPlayer = (name: string) => {
+    if (players.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
+      alert("El jugador ya está agregado.");
+      return;
+    }
+    const newPlayer: Player = {
+      name,
+      handicap: null,
+      scores: Array(18).fill(null),
+    };
+    setPlayers((prev) => [...prev, newPlayer]);
   };
 
   const removePlayer = (name: string) => {
@@ -203,18 +215,15 @@ const RegistroRonda = () => {
             <h2 className="font-semibold mb-2 text-lg">Agregar jugador</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
               <div>
-                <Label htmlFor="playerName">Nombre del jugador</Label>
-                {loadingPlayers ? (
-                  <p className="text-sm text-muted-foreground">Cargando jugadores...</p>
-                ) : (
-                  <PlayerNameComboBox
-                    value={playerName}
-                    onChange={setPlayerName}
-                    options={registeredPlayers}
-                    placeholder="Escribe o selecciona un jugador"
-                    className="w-full"
-                  />
-                )}
+                <Label htmlFor="playerName">Nombre del jugador (nuevo)</Label>
+                <Input
+                  id="playerName"
+                  type="text"
+                  value={playerName}
+                  onChange={(e) => setPlayerName(e.target.value)}
+                  placeholder="Escribe un nombre nuevo"
+                  className="w-full"
+                />
               </div>
               <div>
                 <Label htmlFor="playerHandicap">Handicap</Label>
@@ -230,9 +239,46 @@ const RegistroRonda = () => {
               </div>
               <div>
                 <Button type="button" onClick={addPlayer} className="w-full">
-                  Añadir jugador
+                  Añadir jugador nuevo
                 </Button>
               </div>
+            </div>
+
+            <div className="mt-6">
+              <h3 className="font-semibold mb-2">Jugadores registrados en la base de datos</h3>
+              {loadingPlayers ? (
+                <p className="text-sm text-muted-foreground">Cargando jugadores...</p>
+              ) : registeredPlayers.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No hay jugadores registrados.</p>
+              ) : (
+                <table className="w-full border border-border rounded text-sm">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="border border-border p-2 text-left">Nombre</th>
+                      <th className="border border-border p-2 text-center">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {registeredPlayers.map((name) => (
+                      <tr key={name} className="odd:bg-background even:bg-muted/20">
+                        <td className="border border-border p-2">{name}</td>
+                        <td className="border border-border p-2 text-center">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => addRegisteredPlayer(name)}
+                            disabled={players.some((p) => p.name.toLowerCase() === name.toLowerCase())}
+                          >
+                            {players.some((p) => p.name.toLowerCase() === name.toLowerCase())
+                              ? "Agregado"
+                              : "Agregar"}
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </section>
 
