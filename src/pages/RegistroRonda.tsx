@@ -14,6 +14,7 @@ import { Label } from "../components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useRondas, Player, Round } from "../context/RondasContext";
 import { supabase } from "../integrations/supabase/client";
+import PlayerNameComboBox from "../components/PlayerNameComboBox";
 
 const holeHandicaps = [
   5, 17, 15, 1, 13, 7, 9, 3, 1,
@@ -206,22 +207,13 @@ const RegistroRonda = () => {
                 {loadingPlayers ? (
                   <p className="text-sm text-muted-foreground">Cargando jugadores...</p>
                 ) : (
-                  <>
-                    <Input
-                      list="players-list"
-                      id="playerName"
-                      value={playerName}
-                      onChange={(e) => setPlayerName(e.target.value)}
-                      placeholder="Escribe o selecciona un jugador"
-                      className="w-full border border-border rounded px-3 py-2"
-                      autoComplete="off"
-                    />
-                    <datalist id="players-list">
-                      {registeredPlayers.map((name) => (
-                        <option key={name} value={name} />
-                      ))}
-                    </datalist>
-                  </>
+                  <PlayerNameComboBox
+                    value={playerName}
+                    onChange={setPlayerName}
+                    options={registeredPlayers}
+                    placeholder="Escribe o selecciona un jugador"
+                    className="w-full"
+                  />
                 )}
               </div>
               <div>
