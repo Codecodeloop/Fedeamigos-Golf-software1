@@ -19,9 +19,19 @@ const PlayerNameComboBox = React.forwardRef<HTMLInputElement, PlayerNameComboBox
     const [open, setOpen] = React.useState(false);
     const [inputValue, setInputValue] = React.useState(value);
 
+    // Sync inputValue with external value only if different and not focused
     React.useEffect(() => {
-      setInputValue(value);
+      if (value !== inputValue) {
+        setInputValue(value);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);
+
+    // Ref to input element to manage focus and selection
+    const inputRef = React.useRef<HTMLInputElement | null>(null);
+
+    // Merge forwarded ref with local ref
+    React.useImperativeHandle(ref, () => inputRef.current as HTMLInputElement);
 
     // Filter options based on inputValue (case insensitive)
     const filteredOptions = options.filter((option) =>
@@ -33,6 +43,20 @@ const PlayerNameComboBox = React.forwardRef<HTMLInputElement, PlayerNameComboBox
       onChange(val);
       setInputValue(val);
       setOpen(false);
+      // Focus input after selection
+      setTimeout(() => {
+        inputRef.current?.focus();
+        // Move cursor to end
+        const len = val.length;
+        inputRef.current?.setSelectionRange(len, len);
+      }, 0);
+    };
+
+    // Handle input change without losing cursor position
+    const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setInputValue(e.target.value);
+      onChange(e.target.value);
+      if (!open) setOpen(true);
     };
 
     return (
@@ -40,24 +64,25 @@ const PlayerNameComboBox = React.forwardRef<HTMLInputElement, PlayerNameComboBox
         <PopoverTrigger asChild>
           <div className="relative w-full">
             <Input
-              ref={ref}
+              ref={inputRef}
               value={inputValue}
-              onChange={(e) => {
-                setInputValue(e.target.value);
-                onChange(e.target.value);
-                setOpen(true);
-              }}
+              onChange={onInputChange}
               onFocus={() => setOpen(true)}
               placeholder={placeholder}
               className={cn("pr-8", className)}
               autoComplete="off"
               spellCheck={false}
+              aria-autocomplete="list"
+              aria-expanded={open}
+              aria-haspopup="listbox"
+              role="combobox"
             />
             <button
               type="button"
               aria-label="Toggle player list"
               onClick={() => setOpen((o) => !o)}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded"
+              tabIndex={-1}
             >
               <ChevronDown className="h-4 w-4" />
             </button>
@@ -70,7 +95,11 @@ const PlayerNameComboBox = React.forwardRef<HTMLInputElement, PlayerNameComboBox
               No hay jugadores encontrados
             </div>
           ) : (
-            <ul className="max-h-60 overflow-auto">
+            <ul
+              className="max-h-60 overflow-auto"
+              role="listbox"
+              aria-label="Lista de jugadores"
+            >
               {filteredOptions.map((option) => (
                 <li
                   key={option}
