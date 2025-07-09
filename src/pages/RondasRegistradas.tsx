@@ -740,35 +740,77 @@ const RondasRegistradas = () => {
                             <tbody>
                               <tr>
                                 <td className="border border-border px-2 py-1 font-semibold text-left">Score Bruto</td>
-                                {player.scores.slice(0, 9).map((score, i) => (
-                                  <td key={i} className="border border-border px-2 py-1">
-                                    <input
-                                      type="number"
-                                      min={0}
-                                      value={score !== null ? score : ""}
-                                      onChange={(e) => handleScoreChange(pIndex, i, e.target.value)}
-                                      className="w-12 text-center p-1 border border-border rounded"
-                                      placeholder="-"
-                                      disabled={!isEditing}
-                                    />
-                                  </td>
-                                ))}
+                                {player.scores.slice(0, 9).map((score, i) => {
+                                  if (isEditing) {
+                                    return (
+                                      <td key={i} className="border border-border px-2 py-1">
+                                        <input
+                                          type="number"
+                                          min={0}
+                                          value={score !== null ? score : ""}
+                                          onChange={(e) => handleScoreChange(pIndex, i, e.target.value)}
+                                          className="w-12 text-center p-1 border border-border rounded"
+                                          placeholder="-"
+                                        />
+                                      </td>
+                                    );
+                                  } else {
+                                    // View mode: colored cell
+                                    const par = holePars[i];
+                                    const diff = score !== null ? score - par : null;
+                                    let colorClass = "bg-gray-100 text-gray-400";
+                                    if (diff !== null) {
+                                      if (diff <= -2) colorClass = "bg-blue-900 text-white"; // Eagle
+                                      else if (diff === -1) colorClass = "bg-red-600 text-white"; // Birdie
+                                      else if (diff === 0) colorClass = "bg-white text-black"; // Par
+                                      else if (diff === 1) colorClass = "bg-green-700 text-white"; // Bogey
+                                      else if (diff === 2) colorClass = "bg-yellow-800 text-white"; // Double Bogey
+                                      else colorClass = "bg-blue-400 text-white"; // Other
+                                    }
+                                    return (
+                                      <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
+                                        {score !== null ? score : "-"}
+                                      </td>
+                                    );
+                                  }
+                                })}
                                 <td className="border border-border px-2 py-1 font-bold">
                                   {outTotal}
                                 </td>
-                                {player.scores.slice(9).map((score, i) => (
-                                  <td key={i} className="border border-border px-2 py-1">
-                                    <input
-                                      type="number"
-                                      min={0}
-                                      value={score !== null ? score : ""}
-                                      onChange={(e) => handleScoreChange(pIndex, i + 9, e.target.value)}
-                                      className="w-12 text-center p-1 border border-border rounded"
-                                      placeholder="-"
-                                      disabled={!isEditing}
-                                    />
-                                  </td>
-                                ))}
+                                {player.scores.slice(9).map((score, i) => {
+                                  if (isEditing) {
+                                    return (
+                                      <td key={i} className="border border-border px-2 py-1">
+                                        <input
+                                          type="number"
+                                          min={0}
+                                          value={score !== null ? score : ""}
+                                          onChange={(e) => handleScoreChange(pIndex, i + 9, e.target.value)}
+                                          className="w-12 text-center p-1 border border-border rounded"
+                                          placeholder="-"
+                                        />
+                                      </td>
+                                    );
+                                  } else {
+                                    // View mode: colored cell
+                                    const par = holePars[i + 9];
+                                    const diff = score !== null ? score - par : null;
+                                    let colorClass = "bg-gray-100 text-gray-400";
+                                    if (diff !== null) {
+                                      if (diff <= -2) colorClass = "bg-blue-900 text-white"; // Eagle
+                                      else if (diff === -1) colorClass = "bg-red-600 text-white"; // Birdie
+                                      else if (diff === 0) colorClass = "bg-white text-black"; // Par
+                                      else if (diff === 1) colorClass = "bg-green-700 text-white"; // Bogey
+                                      else if (diff === 2) colorClass = "bg-yellow-800 text-white"; // Double Bogey
+                                      else colorClass = "bg-blue-400 text-white"; // Other
+                                    }
+                                    return (
+                                      <td key={i} className={`border border-border px-2 py-1 font-mono ${colorClass}`}>
+                                        {score !== null ? score : "-"}
+                                      </td>
+                                    );
+                                  }
+                                })}
                                 <td className="border border-border px-2 py-1 font-bold">
                                   {inTotal}
                                 </td>
