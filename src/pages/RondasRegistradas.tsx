@@ -187,13 +187,12 @@ const RondasRegistradas = () => {
     const ganadoresPorHoyo: Record<number, string[]> = {};
 
     for (let hoyo = 0; hoyo < 18; hoyo++) {
-      // Para desempate, recorrer hoyos sucesivos hasta encontrar ganador único o agotar 18 hoyos
       let desempateHoyo = hoyo;
       let ganadores: string[] = [];
       let intentos = 0;
 
       while (intentos < 18) {
-        // Calcular scores netos para el hoyo de desempate actual
+        // Recalcular scores netos para el hoyo de desempate actual
         const scoresHoyo = round.players.map((player) => {
           const netScores = calculateNetScores(player.scores, player.handicap);
           return { name: player.name, netScore: netScores[desempateHoyo] ?? Infinity };
