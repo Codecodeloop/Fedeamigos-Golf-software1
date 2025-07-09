@@ -187,43 +187,76 @@ const RondasRegistradas = () => {
     const ganadoresPorHoyo: Record<number, string[]> = {};
 
     for (let hoyo = 0; hoyo < 18; hoyo++) {
-      let desempateHoyo = hoyo;
-      let ganadores: string[] = [];
+      // Paso 1: obtener scores netos para el hoyo original
+      const netScoresOriginalHoyo = round.players.map((player) => {
+        const netScores = calculateNetScores(player.scores, player.handicap);
+        return { name: player.name, netScore: netScores[hoyo] ?? Infinity };
+      });
+
+      // Encontrar score neto mínimo en el hoyo original
+      const minNetScoreOriginal = Math.min(
+        ...netScoresOriginalHoyo.map((s) => (s.netScore === null ? Infinity : s.netScore))
+      );
+
+      // Filtrar jugadores empatados en el hoyo original
+      let empatados = netScoresOriginalHoyo
+        .filter((s) => s.netScore === minNetScoreOriginal)
+        .map((s) => s.name);
+
+      // Si hay un solo ganador, asignar punto y continuar
+      if (empatados.length === 1) {
+        const ganador = empatados[0];
+        puntosPorHoyo[ganador] = (puntosPorHoyo[ganador] ?? 0) + 1;
+        ganadoresPorHoyo[hoyo + 1] = [ganador];
+        continue;
+      }
+
+      // Si hay empate, desempatar recorriendo hoyos sucesivos
+      let desempateHoyo = (hoyo + 1) % 18;
       let intentos = 0;
+      let ganadorDesempate: string | null = null;
 
       while (intentos < 18) {
-        // Recalcular scores netos para el hoyo de desempate actual
-        const scoresHoyo = round.players.map((player) => {
-          const netScores = calculateNetScores(player.scores, player.handicap);
-          return { name: player.name, netScore: netScores[desempateHoyo] ?? Infinity };
-        });
+        // Calcular scores netos para el hoyo de desempate actual solo para jugadores empatados
+        const scoresDesempate = round.players
+          .filter((p) => empatados.includes(p.name))
+          .map((player) => {
+            const netScores = calculateNetScores(player.scores, player.handicap);
+            return { name: player.name, netScore: netScores[desempateHoyo] ?? Infinity };
+          });
 
-        // Encontrar score neto mínimo
-        const minNetScore = Math.min(
-          ...scoresHoyo.map((s) => (s.netScore === null ? Infinity : s.netScore))
+        // Encontrar score neto mínimo en el hoyo de desempate
+        const minNetScoreDesempate = Math.min(
+          ...scoresDesempate.map((s) => (s.netScore === null ? Infinity : s.netScore))
         );
 
-        // Filtrar jugadores con score neto mínimo
-        ganadores = scoresHoyo
-          .filter((s) => s.netScore === minNetScore)
+        // Filtrar jugadores empatados en el hoyo de desempate
+        const empatadosDesempate = scoresDesempate
+          .filter((s) => s.netScore === minNetScoreDesempate)
           .map((s) => s.name);
 
-        if (ganadores.length === 1) {
-          // Ganador único encontrado
+        if (empatadosDesempate.length === 1) {
+          // Ganador único encontrado en desempate
+          ganadorDesempate = empatadosDesempate[0];
           break;
         }
 
-        // Empate: pasar al siguiente hoyo
+        // Si sigue empate, avanzar al siguiente hoyo
         desempateHoyo = (desempateHoyo + 1) % 18;
         intentos++;
       }
 
-      // Si después de 18 hoyos sigue empate, se mantiene empate
-      ganadores.forEach((g) => {
-        puntosPorHoyo[g] = (puntosPorHoyo[g] ?? 0) + 1;
-      });
-
-      ganadoresPorHoyo[hoyo + 1] = ganadores; // Guardar ganadores para mostrar (hoyo 1-based)
+      if (ganadorDesempate) {
+        // Asignar punto al ganador del desempate para el hoyo original
+        puntosPorHoyo[ganadorDesempate] = (puntosPorHoyo[ganadorDesempate] ?? 0) + 1;
+        ganadoresPorHoyo[hoyo + 1] = [ganadorDesempate];
+      } else {
+        // Si no se encontró ganador único tras 18 hoyos, asignar empate a todos los empatados originales
+        empatados.forEach((jugador) => {
+          puntosPorHoyo[jugador] = (puntosPorHoyo[jugador] ?? 0) + 1 / empatados.length;
+        });
+        ganadoresPorHoyo[hoyo + 1] = [...empatados];
+      }
     }
 
     // 2. Puntos por desempeño global (12 puntos)
