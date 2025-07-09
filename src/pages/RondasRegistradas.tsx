@@ -175,11 +175,19 @@ const RondasRegistradas = () => {
     { name: string; handicap: number | null; scores: (number | null)[] }[]
   >([]);
 
+  // Editing mode state
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Backup for canceling edits
+  const [backupPlayers, setBackupPlayers] = useState<typeof editablePlayers>([]);
+
   // Update editablePlayers when selectedRoundId changes
   useEffect(() => {
     if (selectedRoundId === null) {
       setEditablePlayers([]);
       setBetResultsByRound({});
+      setIsEditing(false);
+      setBackupPlayers([]);
       return;
     }
     const round = rounds.find((r) => r.id === selectedRoundId);
@@ -191,7 +199,9 @@ const RondasRegistradas = () => {
         scores: p.scores.map((s) => s),
       }));
       setEditablePlayers(playersCopy);
+      setBackupPlayers(playersCopy);
       setBetResultsByRound({});
+      setIsEditing(false);
     }
   }, [selectedRoundId, rounds]);
 
@@ -433,16 +443,21 @@ const RondasRegistradas = () => {
     });
   };
 
+  // Cancel editing and restore backup
+  const cancelEditing = () => {
+    setEditablePlayers(backupPlayers);
+    setIsEditing(false);
+  };
+
   // Save changes to the selected round in local state (simulate update)
   const saveChanges = () => {
     if (selectedRoundId === null) return;
-    // Update rounds state locally by replacing players for the selected round
-    // (In real app, would update DB)
-    // Here just update local editablePlayers and clear bet results to force recalculation
+    setBackupPlayers(editablePlayers);
     setBetResultsByRound((prev) => ({
       ...prev,
       [selectedRoundId]: null,
     }));
+    setIsEditing(false);
     alert("Cambios guardados localmente. Por favor, recalcula las apuestas.");
   };
 
@@ -488,9 +503,20 @@ const RondasRegistradas = () => {
           <Button onClick={() => selectedRoundId !== null && calcularApuestas(selectedRoundId)}>
             Calcular Apuestas
           </Button>
-          <Button variant="secondary" onClick={saveChanges}>
-            Guardar Cambios
-          </Button>
+          {!isEditing ? (
+            <Button variant="outline" onClick={() => setIsEditing(true)}>
+              Editar
+            </Button>
+          ) : (
+            <>
+              <Button variant="secondary" onClick={saveChanges}>
+                Guardar Cambios
+              </Button>
+              <Button variant="ghost" onClick={cancelEditing}>
+                Cancelar
+              </Button>
+            </>
+          )}
         </div>
       )}
 
@@ -650,6 +676,7 @@ const RondasRegistradas = () => {
                             value={player.handicap !== null ? player.handicap : ""}
                             onChange={(e) => handleHandicapChange(pIndex, e.target.value)}
                             className="border border-border rounded px-2 py-1 w-20"
+                            disabled={!isEditing}
                           />
                         </div>
                         <p>
@@ -722,6 +749,7 @@ const RondasRegistradas = () => {
                                       onChange={(e) => handleScoreChange(pIndex, i, e.target.value)}
                                       className="w-12 text-center p-1 border border-border rounded"
                                       placeholder="-"
+                                      disabled={!isEditing}
                                     />
                                   </td>
                                 ))}
@@ -737,6 +765,7 @@ const RondasRegistradas = () => {
                                       onChange={(e) => handleScoreChange(pIndex, i + 9, e.target.value)}
                                       className="w-12 text-center p-1 border border-border rounded"
                                       placeholder="-"
+                                      disabled={!isEditing}
                                     />
                                   </td>
                                 ))}
