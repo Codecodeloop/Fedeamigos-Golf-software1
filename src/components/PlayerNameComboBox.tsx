@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Command } from "cmdk";
 import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Check, ChevronDown } from "lucide-react";
 
 interface PlayerNameComboBoxProps {
@@ -28,7 +28,7 @@ const PlayerNameComboBox = React.forwardRef<HTMLInputElement, PlayerNameComboBox
       option.toLowerCase().includes(inputValue.toLowerCase())
     );
 
-    // Handle selection from dropdown
+    // Handle selecting an option
     const handleSelect = (val: string) => {
       onChange(val);
       setInputValue(val);
@@ -36,67 +36,68 @@ const PlayerNameComboBox = React.forwardRef<HTMLInputElement, PlayerNameComboBox
     };
 
     return (
-      <div className="relative w-full">
-        <Input
-          ref={ref}
-          value={inputValue}
-          onChange={(e) => {
-            setInputValue(e.target.value);
-            onChange(e.target.value);
-            setOpen(true);
-          }}
-          onFocus={() => setOpen(true)}
-          placeholder={placeholder}
-          className={cn("pr-8", className)}
-          autoComplete="off"
-        />
-        <button
-          type="button"
-          aria-label="Toggle player list"
-          onClick={() => setOpen((o) => !o)}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded"
-        >
-          <ChevronDown className="h-4 w-4" />
-        </button>
-
-        {open && (
-          <Command
-            className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-popover text-popover-foreground shadow-lg"
-            onSelect={(event) => {
-              const customEvent = event as unknown as CustomEvent<{ value: string }>;
-              handleSelect(customEvent.detail.value);
-            }}
-          >
-            <Command.Input
-              className="hidden"
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <div className="relative w-full">
+            <Input
+              ref={ref}
               value={inputValue}
-              onValueChange={(val) => {
-                setInputValue(val);
-                onChange(val);
+              onChange={(e) => {
+                setInputValue(e.target.value);
+                onChange(e.target.value);
+                setOpen(true);
               }}
+              onFocus={() => setOpen(true)}
+              placeholder={placeholder}
+              className={cn("pr-8", className)}
+              autoComplete="off"
             />
-            <Command.List>
-              {filteredOptions.length === 0 && (
-                <div className="p-2 text-sm text-muted-foreground select-none">
-                  No hay jugadores encontrados
-                </div>
-              )}
+            <button
+              type="button"
+              aria-label="Toggle player list"
+              onClick={() => setOpen((o) => !o)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded"
+            >
+              <ChevronDown className="h-4 w-4" />
+            </button>
+          </div>
+        </PopoverTrigger>
+
+        <PopoverContent className="w-full p-0 mt-1 max-h-60 overflow-auto rounded-md border border-border bg-popover text-popover-foreground shadow-lg">
+          {filteredOptions.length === 0 ? (
+            <div className="p-2 text-sm text-muted-foreground select-none">
+              No hay jugadores encontrados
+            </div>
+          ) : (
+            <ul className="max-h-60 overflow-auto">
               {filteredOptions.map((option) => (
-                <Command.Item
+                <li
                   key={option}
-                  value={option}
-                  className="cursor-pointer select-none rounded px-3 py-2 text-sm outline-none data-[selected]:bg-primary data-[selected]:text-primary-foreground"
+                  onClick={() => handleSelect(option)}
+                  className={cn(
+                    "cursor-pointer select-none px-3 py-2 text-sm hover:bg-primary hover:text-primary-foreground",
+                    value === option ? "bg-primary text-primary-foreground font-semibold" : ""
+                  )}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleSelect(option);
+                    }
+                  }}
+                  role="option"
+                  aria-selected={value === option}
                 >
                   {option}
                   {value === option && (
-                    <Check className="ml-auto h-4 w-4 text-primary-foreground" />
+                    <Check className="inline ml-2 h-4 w-4 text-primary-foreground" />
                   )}
-                </Command.Item>
+                </li>
               ))}
-            </Command.List>
-          </Command>
-        )}
-      </div>
+            </ul>
+          )}
+        </PopoverContent>
+      </Popover>
     );
   }
 );
