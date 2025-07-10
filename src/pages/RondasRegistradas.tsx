@@ -551,7 +551,7 @@ const RondasRegistradas = () => {
                 </div>
 
                 {betResults && (
-                  <section className="bg-white border border-border rounded p-4 shadow-sm">
+                  <section className="bg-white border border-border rounded p-4 shadow-sm space-y-6">
                     <h3 className="text-xl font-semibold mb-4">Detalle de Puntos Ganados</h3>
 
                     <div className="mb-4">
@@ -607,35 +607,52 @@ const RondasRegistradas = () => {
                       )}
                     </div>
 
+                    {/* NUEVO: Resumen detallado por jugador */}
                     <div className="mt-6 border-t border-border pt-4">
-                      <h4 className="font-semibold mb-2">Resumen Total de Puntos y Dinero por Jugador</h4>
-                      <p className="mb-2 text-sm text-muted-foreground">
-                        Valor base por jugador: ${baseValue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </p>
-                      <p className="mb-4 text-sm text-muted-foreground">
-                        Total aportado por todos los jugadores: ${totalAportado.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </p>
-                      <p className="mb-4 text-sm text-muted-foreground">
-                        Total de puntos a repartir (30 + birdies): {totalPuntos}
-                      </p>
-                      <p className="mb-4 text-sm text-muted-foreground font-semibold">
-                        Valor del punto: ${valorDelPunto.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </p>
-                      {allPlayerNames.length === 0 ? (
-                        <p>No hay jugadores registrados.</p>
-                      ) : (
-                        <ul className="list-disc list-inside">
-                          {allPlayerNames.map((player) => {
-                            const puntos = puntosTotales[player] ?? 0;
-                            const dinero = puntos * valorDelPunto;
-                            return (
-                              <li key={player}>
-                                {player}: {puntos.toFixed(2)} puntos - ${dinero.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      )}
+                      <h4 className="font-semibold mb-4">Resumen Detallado por Jugador</h4>
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse border border-border text-sm">
+                          <thead>
+                            <tr className="bg-muted">
+                              <th className="border border-border px-2 py-1 text-left">Jugador</th>
+                              <th className="border border-border px-2 py-1 text-right">Puntos por Hoyo</th>
+                              <th className="border border-border px-2 py-1 text-right">Bruto Total</th>
+                              <th className="border border-border px-2 py-1 text-right">Neto 1-9</th>
+                              <th className="border border-border px-2 py-1 text-right">Neto 10-18</th>
+                              <th className="border border-border px-2 py-1 text-right">Neto Total</th>
+                              <th className="border border-border px-2 py-1 text-right">Birdies</th>
+                              <th className="border border-border px-2 py-1 text-right font-semibold">Total Puntos</th>
+                              <th className="border border-border px-2 py-1 text-right font-semibold">Dinero</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {allPlayerNames.map((player) => {
+                              const puntosHoyo = betResults.puntosPorHoyo[player] ?? 0;
+                              const puntosBruto = betResults.puntosBrutoTotal[player] ?? 0;
+                              const puntosNeto1_9 = betResults.puntosNetoPrimeros9[player] ?? 0;
+                              const puntosNeto10_18 = betResults.puntosNetoSegundos9[player] ?? 0;
+                              const puntosNetoTotal = betResults.puntosNetoTotal[player] ?? 0;
+                              const puntosBirdies = betResults.puntosBirdies[player] ?? 0;
+                              const totalPuntos = puntosHoyo + puntosBruto + puntosNeto1_9 + puntosNeto10_18 + puntosNetoTotal + puntosBirdies;
+                              const dinero = totalPuntos * valorDelPunto;
+
+                              return (
+                                <tr key={player} className="odd:bg-background even:bg-muted/20">
+                                  <td className="border border-border px-2 py-1">{player}</td>
+                                  <td className="border border-border px-2 py-1 text-right">{puntosHoyo.toFixed(2)}</td>
+                                  <td className="border border-border px-2 py-1 text-right">{puntosBruto.toFixed(2)}</td>
+                                  <td className="border border-border px-2 py-1 text-right">{puntosNeto1_9.toFixed(2)}</td>
+                                  <td className="border border-border px-2 py-1 text-right">{puntosNeto10_18.toFixed(2)}</td>
+                                  <td className="border border-border px-2 py-1 text-right">{puntosNetoTotal.toFixed(2)}</td>
+                                  <td className="border border-border px-2 py-1 text-right">{puntosBirdies.toFixed(2)}</td>
+                                  <td className="border border-border px-2 py-1 text-right font-semibold">{totalPuntos.toFixed(2)}</td>
+                                  <td className="border border-border px-2 py-1 text-right font-semibold">${dinero.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </section>
                 )}
