@@ -607,10 +607,10 @@ const RondasRegistradas = () => {
                       )}
                     </div>
 
-                    {/* Mini resumen con valor del punto, total recogido, total puntos y puntos por jugador */}
+                    {/* Mini resumen con valor del punto, total recogido, total puntos */}
                     <div className="mb-6 border-t border-border pt-4">
                       <h4 className="font-semibold mb-2">Resumen General</h4>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                      <div className="grid grid-cols-3 gap-4 text-sm">
                         <div>
                           <span className="font-semibold">Valor del punto:</span>{" "}
                           ${valorDelPunto.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -621,16 +621,6 @@ const RondasRegistradas = () => {
                         </div>
                         <div>
                           <span className="font-semibold">Total puntos:</span> {totalPuntos.toFixed(2)}
-                        </div>
-                        <div>
-                          <span className="font-semibold">Puntos por jugador:</span>
-                          <ul className="list-disc list-inside max-h-32 overflow-y-auto mt-1">
-                            {allPlayerNames.map((player) => (
-                              <li key={player}>
-                                {player}: {puntosTotales[player]?.toFixed(2) ?? "0.00"}
-                              </li>
-                            ))}
-                          </ul>
                         </div>
                       </div>
                     </div>
